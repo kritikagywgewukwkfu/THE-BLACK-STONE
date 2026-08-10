@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Waiter Order Management</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="container mx-auto p-4 max-w-4xl">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Waiter Order Management</h1>
+
+        <!-- Order Taking Form -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">New Order / Add Item</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-gray-600 mb-1">Table Number</label>
+                    <input type="text" id="tableNo" class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="e.g., Table 4">
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Food Item</label>
+                    <input type="text" id="foodItem" class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="e.g., Momo, Burger">
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Quantity</label>
+                    <input type="number" id="quantity" min="1" value="1" class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
+            </div>
+            <button onclick="addOrUpdateOrder()" id="actionBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Place Order</button>
+        </div>
+
+        <!-- Orders View Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Active Orders View</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200 text-left">
+                            <th class="p-3 border">Table</th>
+                            <th class="p-3 border">Item</th>
+                            <th class="p-3 border">Quantity</th>
+                            <th class="p-3 border text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        <!-- Dynamic Orders will appear here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let orders = [];
+        let editIndex = null; // To track if we are editing an existing entry
+
+        function addOrUpdateOrder() {
+            const tableNo = document.getElementById('tableNo').value.trim();
+            const foodItem = document.getElementById('foodItem').value.trim();
+            const quantity = document.getElementById('quantity').value;
+
+            if (!tableNo || !foodItem || !quantity) {
+                alert('Sabai field haru bharnu hola!');
+                return;
+            }
+
+            if (editIndex === null) {
+                // New Order Add garne
+                orders.push({ tableNo, foodItem, quantity });
+            } else {
+                // Existing order update/add garne
+                orders[editIndex] = { tableNo, foodItem, quantity };
+                editIndex = null;
+                document.getElementById('actionBtn').innerText = 'Place Order';
+                document.getElementById('actionBtn').classList.replace('bg-green-600', 'bg-blue-600');
+            }
+
+            clearForm();
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const tbody = document.getElementById('orderTableBody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No active orders found.</td></tr>`;
+                return;
+            }
+
+            orders.forEach((order, index) => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 border">${order.tableNo}</td>
+                        <td class="p-3 border">${order.foodItem}</td>
+                        <td class="p-3 border">${order.quantity}</td>
+                        <td class="p-3 border text-center space-x-2">
+                            <button onclick="editOrder(${index})" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">Add / Edit</button>
+                            <button onclick="deleteOrder(${index})" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function editOrder(index) {
+            const order = orders[index];
+            document.getElementById('tableNo').value = order.tableNo;
+            document.getElementById('foodItem').value = order.foodItem;
+            document.getElementById('quantity').value = order.quantity;
+
+            editIndex = index;
+            document.getElementById('actionBtn').innerText = 'Update Order';
+            document.getElementById('actionBtn').classList.replace('bg-blue-600', 'bg-green-600');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteOrder(index) {
+            if (confirm('Ke tapai yo order delete garna chahanunchha?')) {
+                orders.splice(index, 1);
+                renderOrders();
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('tableNo').value = '';
+            document.getElementById('foodItem').value = '';
+            document.getElementById('quantity').value = '1';
+        }
+    </script>
+</body>
+</html>

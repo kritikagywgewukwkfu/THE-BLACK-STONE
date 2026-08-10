@@ -1,0 +1,71 @@
+/* Modern Professional Café POS Theme */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-main: #0f1115;
+  --bg-card: #181b22;
+  --sidebar-bg: #12141a;
+  --accent-gold: #d4af37;
+  --accent-hover: #e5c158;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --border-color: #2a2f3a;
+  --danger: #ef4444;
+  --success: #10b981;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+/* Layout Utilities */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Card Styling */
+.pro-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+.pro-card:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+/* Buttons */
+.btn-gold {
+  background-color: var(--accent-gold);
+  color: #000;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-gold:hover {
+  background-color: var(--accent-hover);
+}
