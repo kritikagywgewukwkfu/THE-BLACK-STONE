@@ -43,19 +43,19 @@ function App() {
 
   const [currentCart, setCurrentCart] = useState([]);
   
-  // Clean Data Reset: Initialized to empty array[cite: 6]
+  // Clean Data Reset: Initialized to empty array
   const [placedOrders, setPlacedOrders] = useState(() => {
     const saved = localStorage.getItem('bs_placedOrders');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Clean Data Reset: Initialized to empty array[cite: 6]
+  // Clean Data Reset: Initialized to empty array
   const [expenses, setExpenses] = useState(() => {
     const saved = localStorage.getItem('bs_expenses');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Clean Data Reset: Initialized with blank names and zero values[cite: 6]
+  // Clean Data Reset: Initialized with blank names and zero values
   const [staffList, setStaffList] = useState(() => {
     const saved = localStorage.getItem('bs_staffList');
     return saved ? JSON.parse(saved) : [
@@ -76,23 +76,15 @@ function App() {
   const prevOrdersLenRef = useRef(placedOrders.length);
   const [selectedBill, setSelectedBill] = useState(null);
 
+  // Mobile Hamburger Sidebar Toggle State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // QR Customer View State
   const [customerTable, setCustomerTable] = useState(null);
   const [customerCart, setCustomerCart] = useState([]);
   const [customerCategory, setCustomerCategory] = useState('All');
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [customerOrderPlaced, setCustomerOrderPlaced] = useState(false);
-
-  // Clean / Clear All Current Order Data Function for Cafe Manager Handover
-  const handleCleanAllOrders = () => {
-    if (window.confirm('Are you sure you want to clean/clear all current placed orders and history? This will reset active orders for a fresh shift.')) {
-      setPlacedOrders([]);
-      localStorage.setItem('bs_placedOrders', JSON.stringify([]));
-      setCurrentCart([]);
-      setSelectedBill(null);
-      alert('All order data has been successfully cleaned and reset for the manager shift!');
-    }
-  };
 
   // Web Audio API Beep Sound Generator for KOT Alerts
   const playBeep = () => {
@@ -293,44 +285,44 @@ function App() {
     const myTableOrders = placedOrders.filter(ord => ord.tableNo === customerTable && ord.status !== 'Billed');
 
     return (
-      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '16px', fontFamily: "Inter, system-ui, sans-serif", backgroundColor: '#090d16', minHeight: '100vh', color: '#f8fafc', boxSizing: 'border-box' }}>
-        <div style={{ textAlign: 'center', marginBottom: '16px', background: 'linear-gradient(135deg, #111827 0%, #1f2937 100%)', color: '#fff', padding: '24px 20px', borderRadius: '24px', border: '1px solid rgba(197, 160, 89, 0.3)', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
-          <div style={{ width: '60px', height: '60px', margin: '0 auto 10px auto', borderRadius: '50%', overflow: 'hidden', border: '2px solid #C5A059', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#111827', boxShadow: '0 0 15px rgba(197, 160, 89, 0.3)' }}>
-            <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e)=>{e.target.style.display='none';}} />
+      <div className="customer-portal">
+        <div className="customer-header">
+          <div className="customer-logo">
+            <img src="/logo.png" alt="Logo" onError={(e)=>{e.target.style.display='none';}} />
           </div>
-          <h2 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', letterSpacing: '0.5px' }}>The Black Stone</h2>
-          <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>Scan, Select & Enjoy Your Meal</p>
-          <div style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(59, 130, 246, 0.15)', border: '1px solid #3b82f6', color: '#60a5fa', padding: '6px 16px', borderRadius: '30px', fontSize: '13px', fontWeight: '600' }}>
+          <h2>The Black Stone</h2>
+          <p>Scan, Select & Enjoy Your Meal</p>
+          <div className="customer-table-badge">
             📍 Seated at: {customerTable}
           </div>
         </div>
 
         {customerOrderPlaced ? (
-          <div style={{ textAlign: 'center', backgroundColor: '#111827', padding: '40px 24px', borderRadius: '24px', border: '1px solid #1f2937', marginTop: '20px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎉</div>
-            <h2 style={{ color: '#34d399', fontSize: '22px', fontWeight: '700' }}>Order Placed Successfully!</h2>
-            <p style={{ color: '#94a3b8', fontSize: '14px', margin: '15px 0 24px 0', lineHeight: '1.5' }}>Your items have been sent straight to the kitchen. Enjoy your stay at The Black Stone!</p>
-            <button onClick={() => setCustomerOrderPlaced(false)} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '700', fontSize: '14px', boxShadow: '0 4px 15px rgba(197, 160, 89, 0.3)' }}>
+          <div className="customer-success-card">
+            <div className="success-icon">🎉</div>
+            <h2>Order Placed Successfully!</h2>
+            <p>Your items have been sent straight to the kitchen. Enjoy your stay at The Black Stone!</p>
+            <button onClick={() => setCustomerOrderPlaced(false)} className="gold-btn">
               Order More Items
             </button>
           </div>
         ) : (
           <div>
             {myTableOrders.length > 0 && (
-              <div style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '20px', padding: '16px', marginBottom: '16px' }}>
-                <div style={{ fontWeight: '700', fontSize: '14px', color: '#f8fafc', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="live-tracking-card">
+                <div className="tracking-header">
                   <span>📢 Live Order Tracking</span>
-                  <span style={{ fontSize: '12px', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '2px 10px', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>Active</span>
+                  <span className="tracking-status-badge">Active</span>
                 </div>
                 {myTableOrders.map((ord, idx) => (
-                  <div key={idx} style={{ fontSize: '13px', padding: '8px 0', borderBottom: idx < myTableOrders.length - 1 ? '1px solid #1f2937' : 'none' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '600', color: '#e2e8f0', marginBottom: '4px' }}>
+                  <div key={idx} className="tracking-item">
+                    <div className="tracking-item-top">
                       <span>Order #{ord.id}</span>
                       <span style={{ color: ord.status === 'Ready' ? '#34d399' : ord.status === 'Preparing' ? '#fbbf24' : '#60a5fa' }}>
                         ● {ord.status}
                       </span>
                     </div>
-                    <div style={{ color: '#94a3b8', fontSize: '12px' }}>
+                    <div className="tracking-item-desc">
                       Items: {ord.items.map(i => `${i.name} (${i.qty})`).join(', ')}
                     </div>
                   </div>
@@ -338,45 +330,39 @@ function App() {
               </div>
             )}
 
-            <div style={{ marginBottom: '14px' }}>
+            <div className="search-container">
               <input
                 type="text"
                 placeholder="🔍 Search items..."
                 value={customerSearchQuery}
                 onChange={(e) => setCustomerSearchQuery(e.target.value)}
-                style={{ width: '100%', padding: '12px 16px', borderRadius: '14px', border: '1px solid #1f2937', backgroundColor: '#111827', color: '#fff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '4px' }}>
+            <div className="category-chips">
               {customerCategories.map((cat, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCustomerCategory(cat)}
-                  style={{
-                    padding: '8px 16px', borderRadius: '20px', border: customerCategory === cat ? '1px solid #C5A059' : '1px solid #1f2937', whiteSpace: 'nowrap',
-                    backgroundColor: customerCategory === cat ? '#C5A059' : '#111827',
-                    color: customerCategory === cat ? '#090d16' : '#94a3b8',
-                    fontSize: '13px', cursor: 'pointer', fontWeight: customerCategory === cat ? '700' : '500'
-                  }}
+                  className={`category-chip ${customerCategory === cat ? 'active' : ''}`}
                 >
                   {cat}
                 </button>
               ))}
             </div>
 
-            <div style={{ marginBottom: '110px' }}>
+            <div className="customer-menu-list">
               {filteredCustomerMenu.map((cat, idx) => (
-                <div key={idx} style={{ marginBottom: '20px' }}>
-                  <h4 style={{ color: '#C5A059', borderBottom: '1px solid #1f2937', paddingBottom: '6px', marginBottom: '12px', fontSize: '16px', fontWeight: '700' }}>{cat.category}</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div key={idx} className="menu-category-group">
+                  <h4>{cat.category}</h4>
+                  <div className="menu-items-grid">
                     {cat.items.map((item, i) => (
-                      <div key={i} style={{ backgroundColor: '#111827', padding: '16px', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #1f2937' }}>
-                        <div style={{ flex: 1, paddingRight: '12px' }}>
-                          <div style={{ fontWeight: '600', color: '#f8fafc', fontSize: '15px' }}>{item.name}</div>
-                          <div style={{ color: '#34d399', fontSize: '14px', marginTop: '4px', fontWeight: '700' }}>Rs. {item.price}</div>
+                      <div key={i} className="menu-item-card">
+                        <div className="item-info">
+                          <div className="item-name">{item.name}</div>
+                          <div className="item-price">Rs. {item.price}</div>
                         </div>
-                        <button onClick={() => addToCustomerCart(item)} style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', boxShadow: '0 4px 12px rgba(59,130,246,0.3)' }}>
+                        <button onClick={() => addToCustomerCart(item)} className="add-btn">
                           + Add
                         </button>
                       </div>
@@ -387,24 +373,24 @@ function App() {
             </div>
 
             {customerCart.length > 0 && (
-              <div style={{ position: 'fixed', bottom: '15px', left: '16px', right: '16px', maxWidth: '448px', margin: '0 auto', backgroundColor: '#111827', color: '#fff', padding: '16px', borderRadius: '20px', border: '1px solid #C5A059', boxShadow: '0 15px 35px rgba(0,0,0,0.5)' }}>
-                <div style={{ fontWeight: '700', marginBottom: '8px', fontSize: '14px', borderBottom: '1px solid #1f2937', paddingBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+              <div className="floating-cart">
+                <div className="cart-header">
                   <span>🛒 Cart Summary</span>
                   <span>{customerCart.reduce((sum, it) => sum + it.qty, 0)} items</span>
                 </div>
-                <div style={{ maxHeight: '110px', overflowY: 'auto', marginBottom: '12px' }}>
+                <div className="cart-items-scroll">
                   {customerCart.map((it, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', margin: '6px 0', color: '#94a3b8', alignItems: 'center' }}>
+                    <div key={i} className="cart-item-row">
                       <span>{it.name} x {it.qty}</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: '600', color: '#fff' }}>Rs. {it.price * it.qty}</span>
-                        <button onClick={() => updateCustomerQty(it.name, -1)} style={{ padding: '2px 8px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>-</button>
-                        <button onClick={() => updateCustomerQty(it.name, 1)} style={{ padding: '2px 8px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>+</button>
+                      <div className="cart-item-controls">
+                        <span className="item-total-price">Rs. {it.price * it.qty}</span>
+                        <button onClick={() => updateCustomerQty(it.name, -1)} className="qty-btn red">-</button>
+                        <button onClick={() => updateCustomerQty(it.name, 1)} className="qty-btn green">+</button>
                       </div>
                     </div>
                   ))}
                 </div>
-                <button onClick={handleCustomerSubmitOrder} style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #34d399 0%, #059669 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(52,211,153,0.3)' }}>
+                <button onClick={handleCustomerSubmitOrder} className="confirm-order-btn">
                   Confirm & Send Order 🚀
                 </button>
               </div>
@@ -749,33 +735,33 @@ function App() {
 
   if (!isLoggedIn) {
     return (
-      <div style={{ height: '100vh', backgroundColor: '#090d16', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "Inter, system-ui, sans-serif", padding: '16px' }}>
-        <form onSubmit={handleLogin} style={{ backgroundColor: '#111827', padding: '40px 32px', borderRadius: '24px', border: '1px solid rgba(197, 160, 89, 0.3)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-          <div style={{ width: '70px', height: '70px', backgroundColor: '#090d16', borderRadius: '50%', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px solid #C5A059', boxShadow: '0 0 20px rgba(197, 160, 89, 0.4)' }}>
-            <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e)=>{e.target.style.display='none';}} />
+      <div className="login-wrapper">
+        <form onSubmit={handleLogin} className="login-card">
+          <div className="login-logo-container">
+            <img src="/logo.png" alt="Logo" onError={(e)=>{e.target.style.display='none';}} />
           </div>
-          <h2 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '24px', fontWeight: '750', letterSpacing: '0.5px' }}>The Black Stone</h2>
-          <p style={{ color: '#94a3b8', fontSize: '13px', margin: '0 0 28px 0' }}>Unified POS & Management Portal</p>
+          <h2>The Black Stone</h2>
+          <p>Unified POS & Management Portal</p>
           
-          <div style={{ textAlign: 'left', marginBottom: '16px' }}>
-            <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600' }}>Email Address</label>
-            <input type="email" placeholder="admin@blackstone.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required style={{ width: '100%', padding: '12px 14px', marginTop: '6px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
+          <div className="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="admin@blackstone.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
           </div>
 
-          <div style={{ textAlign: 'left', marginBottom: '16px' }}>
-            <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600' }}>Password</label>
-            <input type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required style={{ width: '100%', padding: '12px 14px', marginTop: '6px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
           </div>
 
-          <div style={{ textAlign: 'left', marginBottom: '28px' }}>
-            <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600' }}>Staff Role & Permissions</label>
-            <select value={userRole} onChange={(e) => setUserRole(e.target.value)} style={{ width: '100%', padding: '12px 14px', marginTop: '6px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontWeight: '600' }}>
+          <div className="form-group">
+            <label>Staff Role & Permissions</label>
+            <select value={userRole} onChange={(e) => setUserRole(e.target.value)}>
               <option value="admin">👑 Admin & Cashier (Full Access)</option>
               <option value="waiter">📝 Waiter (Orders & Status)</option>
             </select>
           </div>
 
-          <button type="submit" style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '15px', cursor: 'pointer', boxShadow: '0 4px 20px rgba(197, 160, 89, 0.4)' }}>
+          <button type="submit" className="gold-btn">
             Login to System
           </button>
         </form>
@@ -808,53 +794,766 @@ function App() {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "Inter, system-ui, sans-serif", backgroundColor: '#090d16', color: '#f8fafc' }}>
+    <div className="app-layout">
       <style>{`
         @media print {
           body * { visibility: hidden; }
           #printable-area, #printable-area * { visibility: visible; }
           #printable-area { position: absolute; left: 0; top: 0; width: 80mm; font-size: 12px; font-family: 'Courier New', Courier, monospace; color: #000; }
         }
+        
         * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background-color: #090d16; color: #f8fafc; font-family: Inter, system-ui, sans-serif; }
+        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #090d16; }
         ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #C5A059; }
+
+        /* Modern Responsive CSS Architecture */
+        .app-layout {
+          display: flex;
+          min-height: 100vh;
+          background-color: #090d16;
+          position: relative;
+        }
+
+        /* Desktop Sidebar */
+        .desktop-sidebar {
+          width: 260px;
+          background-color: #111827;
+          border-right: 1px solid #1f2937;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 24px 0;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          z-index: 1200;
+          flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+          padding: 0 24px 20px 24px;
+          border-bottom: 1px solid #1f2937;
+          margin-bottom: 16px;
+          text-align: center;
+        }
+
+        .brand-logo-circle {
+          width: 48px;
+          height: 48px;
+          margin: 0 auto 10px auto;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 1.5px solid #C5A059;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #090d16;
+          box-shadow: 0 0 10px rgba(197, 160, 89, 0.3);
+        }
+
+        .brand-logo-circle img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .sidebar-brand h2 {
+          margin: 0;
+          font-size: 15px;
+          color: #fff;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+        }
+
+        .role-badge {
+          font-size: 11px;
+          background: rgba(197, 160, 89, 0.2);
+          color: #C5A059;
+          padding: 2px 8px;
+          border-radius: 6px;
+          border: 1px solid rgba(197, 160, 89, 0.3);
+          text-transform: uppercase;
+          font-weight: 700;
+          display: inline-block;
+          margin-top: 6px;
+        }
+
+        .sidebar-nav {
+          padding: 0 12px;
+          overflow-y: auto;
+          flex: 1;
+        }
+
+        .nav-item-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 14px;
+          border-radius: 12px;
+          text-align: left;
+          font-size: 14px;
+          cursor: pointer;
+          margin-bottom: 6px;
+          transition: all 0.2s ease;
+        }
+
+        .sidebar-footer {
+          padding: 0 20px;
+          border-top: 1px solid #1f2937;
+          padding-top: 16px;
+        }
+
+        .logout-btn {
+          width: 100%;
+          padding: 12px;
+          background-color: rgba(239, 68, 68, 0.15);
+          color: #f87171;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: 12px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        /* Mobile Navbar & Hamburger */
+        .mobile-navbar {
+          display: none;
+          background-color: #111827;
+          border-bottom: 1px solid #1f2937;
+          padding: 12px 16px;
+          align-items: center;
+          justify-content: space-between;
+          position: sticky;
+          top: 0;
+          z-index: 1300;
+          width: 100%;
+        }
+
+        .mobile-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .mobile-logo {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 1.5px solid #C5A059;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #090d16;
+        }
+
+        .mobile-logo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .hamburger-btn {
+          background: #1f2937;
+          border: 1px solid #374151;
+          color: #fff;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 16px;
+          cursor: pointer;
+        }
+
+        .mobile-dropdown-menu {
+          position: fixed;
+          top: 61px;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #090d16;
+          z-index: 1250;
+          padding: 20px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        /* Main Workspace Content Area */
+        .main-workspace {
+          flex: 1;
+          padding: 32px;
+          overflow-y: auto;
+          width: 100%;
+          max-width: 100%;
+        }
+
+        /* Common Components Styling */
+        .gold-btn {
+          width: 100%;
+          padding: 14px;
+          background: linear-gradient(135deg, #C5A059 0%, #a3813e 100%);
+          color: #090d16;
+          border: none;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 15px;
+          cursor: pointer;
+          box-shadow: 0 4px 20px rgba(197, 160, 89, 0.4);
+        }
+
+        .login-wrapper {
+          height: 100vh;
+          background-color: #090d16;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          width: 100vw;
+        }
+
+        .login-card {
+          background-color: #111827;
+          padding: 40px 32px;
+          border-radius: 24px;
+          border: 1px solid rgba(197, 160, 89, 0.3);
+          box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+          width: 100%;
+          max-width: 400px;
+          text-align: center;
+        }
+
+        .login-logo-container {
+          width: 70px;
+          height: 70px;
+          background-color: #090d16;
+          border-radius: 50%;
+          margin: 0 auto 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          border: 2px solid #C5A059;
+          box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+        }
+
+        .login-logo-container img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .form-group {
+          text-align: left;
+          margin-bottom: 16px;
+        }
+
+        .form-group label {
+          font-size: 13px;
+          color: #cbd5e1;
+          font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+          width: 100%;
+          padding: 12px 14px;
+          margin-top: 6px;
+          border-radius: 12px;
+          border: 1px solid #1f2937;
+          background-color: #090d16;
+          color: #fff;
+          font-size: 14px;
+          outline: none;
+        }
+
+        /* Dashboard Flex & Grid Systems */
+        .dashboard-header-flex, .filter-header-flex {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+
+        .metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 20px;
+          margin-bottom: 32px;
+        }
+
+        .metric-card {
+          background-color: #111827;
+          padding: 24px;
+          border-radius: 20px;
+          border: 1px solid #1f2937;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .time-filters-bar {
+          display: flex;
+          gap: 6px;
+          background-color: #111827;
+          padding: 4px;
+          border-radius: 12px;
+          border: 1px solid #1f2937;
+          overflow-x: auto;
+          max-width: 100%;
+        }
+
+        .time-filter-btn {
+          padding: 6px 12px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+
+        /* Responsive Cards and Tables */
+        .card-container {
+          background-color: #111827;
+          padding: 24px;
+          border-radius: 20px;
+          border: 1px solid #1f2937;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .table-responsive-wrapper {
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .custom-data-table {
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 600px;
+        }
+
+        .custom-data-table th {
+          background-color: #090d16;
+          text-align: left;
+          color: #94a3b8;
+          font-size: 13px;
+          padding: 12px;
+          border-bottom: 1px solid #1f2937;
+        }
+
+        .custom-data-table td {
+          padding: 12px;
+          border-bottom: 1px solid #1f2937;
+          font-size: 14px;
+        }
+
+        /* Dual Grid Layouts for Order & Management */
+        .dual-grid-section {
+          display: grid;
+          grid-template-columns: 1fr 380px;
+          gap: 24px;
+        }
+
+        @media (max-width: 1100px) {
+          .dual-grid-section {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        /* Customer Portal Styles */
+        .customer-portal {
+          max-width: 480px;
+          margin: 0 auto;
+          padding: 16px;
+          background-color: #090d16;
+          min-height: 100vh;
+          color: #f8fafc;
+        }
+
+        .customer-header {
+          text-align: center;
+          margin-bottom: 16px;
+          background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+          color: #fff;
+          padding: 24px 20px;
+          border-radius: 24px;
+          border: 1px solid rgba(197, 160, 89, 0.3);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .customer-logo {
+          width: 60px;
+          height: 60px;
+          margin: 0 auto 10px auto;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid #C5A059;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #111827;
+        }
+
+        .customer-logo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .customer-table-badge {
+          margin-top: 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background-color: rgba(59, 130, 246, 0.15);
+          border: 1px solid #3b82f6;
+          color: #60a5fa;
+          padding: 6px 16px;
+          border-radius: 30px;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .customer-success-card {
+          text-align: center;
+          background-color: #111827;
+          padding: 40px 24px;
+          border-radius: 24px;
+          border: 1px solid #1f2937;
+          margin-top: 20px;
+        }
+
+        .success-icon {
+          font-size: 48px;
+          margin-bottom: 12px;
+        }
+
+        .live-tracking-card {
+          background-color: #111827;
+          border: 1px solid #1f2937;
+          border-radius: 20px;
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+
+        .tracking-header {
+          font-weight: 700;
+          font-size: 14px;
+          color: #f8fafc;
+          margin-bottom: 10px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .tracking-status-badge {
+          font-size: 12px;
+          background: rgba(59, 130, 246, 0.2);
+          color: #60a5fa;
+          padding: 2px 10px;
+          border-radius: 6px;
+          border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .tracking-item {
+          font-size: 13px;
+          padding: 8px 0;
+          border-bottom: 1px solid #1f2937;
+        }
+
+        .tracking-item-top {
+          display: flex;
+          justify-content: space-between;
+          font-weight: 600;
+          color: #e2e8f0;
+          margin-bottom: 4px;
+        }
+
+        .tracking-item-desc {
+          color: #94a3b8;
+          font-size: 12px;
+        }
+
+        .search-container {
+          margin-bottom: 14px;
+        }
+
+        .search-container input {
+          width: 100%;
+          padding: 12px 16px;
+          border-radius: 14px;
+          border: 1px solid #1f2937;
+          background-color: #111827;
+          color: #fff;
+          font-size: 14px;
+          outline: none;
+        }
+
+        .category-chips {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          margin-bottom: 16px;
+          padding-bottom: 4px;
+        }
+
+        .category-chip {
+          padding: 8px 16px;
+          border-radius: 20px;
+          white-space: nowrap;
+          font-size: 13px;
+          cursor: pointer;
+        }
+
+        .category-chip.active {
+          background-color: #C5A059;
+          color: #090d16;
+          font-weight: 700;
+          border: 1px solid #C5A059;
+        }
+
+        .category-chip:not(.active) {
+          background-color: #111827;
+          color: #94a3b8;
+          border: 1px solid #1f2937;
+          font-weight: 500;
+        }
+
+        .customer-menu-list {
+          margin-bottom: 110px;
+        }
+
+        .menu-category-group h4 {
+          color: #C5A059;
+          border-bottom: 1px solid #1f2937;
+          padding-bottom: 6px;
+          margin-bottom: 12px;
+          font-size: 16px;
+          font-weight: 700;
+        }
+
+        .menu-items-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .menu-item-card {
+          background-color: #111827;
+          padding: 16px;
+          borderRadius: 16px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border: 1px solid #1f2937;
+        }
+
+        .item-info .item-name {
+          font-weight: 600;
+          color: #f8fafc;
+          font-size: 15px;
+        }
+
+        .item-info .item-price {
+          color: #34d399;
+          font-size: 14px;
+          margin-top: 4px;
+          font-weight: 700;
+        }
+
+        .add-btn {
+          padding: 8px 16px;
+          background-color: #3b82f6;
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 600;
+          box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+
+        .floating-cart {
+          position: fixed;
+          bottom: 15px;
+          left: 16px;
+          right: 16px;
+          max-width: 448px;
+          margin: 0 auto;
+          background-color: #111827;
+          color: #fff;
+          padding: 16px;
+          border-radius: 20px;
+          border: 1px solid #C5A059;
+          box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+          z-index: 1400;
+        }
+
+        .cart-header {
+          font-weight: 700;
+          margin-bottom: 8px;
+          font-size: 14px;
+          border-bottom: 1px solid #1f2937;
+          padding-bottom: 8px;
+          display: flex;
+          justify-content: space-between;
+        }
+
+        .cart-items-scroll {
+          max-height: 110px;
+          overflow-y: auto;
+          margin-bottom: 12px;
+        }
+
+        .cart-item-row {
+          display: flex;
+          justify-content: space-between;
+          font-size: 13px;
+          margin: 6px 0;
+          color: #94a3b8;
+          align-items: center;
+        }
+
+        .cart-item-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .item-total-price {
+          font-weight: 600;
+          color: #fff;
+        }
+
+        .qty-btn {
+          padding: 2px 8px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          color: #fff;
+        }
+
+        .qty-btn.red { background: #ef4444; }
+        .qty-btn.green { background: #10b981; }
+
+        .confirm-order-btn {
+          width: 100%;
+          padding: 13px;
+          background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+          color: #090d16;
+          border: none;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 14px;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(52,211,153,0.3);
+        }
+
+        /* Media Breakpoints for Mobile Viewport Adaptation */
+        @media (max-width: 900px) {
+          .app-layout {
+            flex-direction: column;
+          }
+          .desktop-sidebar {
+            display: none !important;
+          }
+          .mobile-navbar {
+            display: flex !important;
+          }
+          .main-workspace {
+            padding: 16px !important;
+            max-width: 100% !important;
+          }
+        }
       `}</style>
 
-      {/* SIDEBAR */}
-      <aside style={{ 
-        width: '260px', backgroundColor: '#111827', borderRight: '1px solid #1f2937', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '24px 0', 
-        position: 'sticky', top: 0, height: '100vh', zIndex: 1200, flexShrink: 0
-      }}>
-        <div>
-          <div style={{ padding: '0 24px 20px 24px', borderBottom: '1px solid #1f2937', marginBottom: '16px', textAlign: 'center' }}>
-            <div style={{ width: '48px', height: '48px', margin: '0 auto 10px auto', borderRadius: '50%', overflow: 'hidden', border: '1.5px solid #C5A059', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#090d16', boxShadow: '0 0 10px rgba(197, 160, 89, 0.3)' }}>
-              <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e)=>{e.target.style.display='none';}} />
+      {/* MOBILE TOP NAVIGATION BAR */}
+      <div className="mobile-navbar">
+        <div className="mobile-brand">
+          <div className="mobile-logo">
+            <img src="/logo.png" alt="Logo" onError={(e)=>{e.target.style.display='none';}} />
+          </div>
+          <span style={{ fontWeight: '700', fontSize: '15px', color: '#fff' }}>The Black Stone</span>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="hamburger-btn"
+        >
+          {isMobileMenuOpen ? '✕ Close' : '☰ Menu'}
+        </button>
+      </div>
+
+      {/* MOBILE FULLSCREEN DROPDOWN MENU */}
+      {isMobileMenuOpen && (
+        <div className="mobile-dropdown-menu">
+          <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+              {sidebarItems.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px',
+                      backgroundColor: isActive ? 'rgba(197, 160, 89, 0.15)' : '#111827',
+                      color: isActive ? '#C5A059' : '#94a3b8',
+                      border: isActive ? '1px solid rgba(197, 160, 89, 0.3)' : '1px solid #1f2937', 
+                      borderRadius: '12px', textAlign: 'left', fontSize: '15px',
+                      fontWeight: isActive ? '700' : '500', cursor: 'pointer'
+                    }}
+                  >
+                    <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <h2 style={{ margin: 0, fontSize: '15px', color: '#fff', fontWeight: '700', letterSpacing: '0.5px' }}>The Black Stone</h2>
-            <div style={{ marginTop: '6px' }}>
-              <span style={{ fontSize: '11px', background: 'rgba(197, 160, 89, 0.2)', color: '#C5A059', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(197, 160, 89, 0.3)', textTransform: 'uppercase', fontWeight: '700' }}>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid #1f2937', paddingTop: '16px' }}>
+            <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="logout-btn">
+              🚪 Logout
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* DESKTOP SIDEBAR */}
+      <aside className="desktop-sidebar">
+        <div>
+          <div className="sidebar-brand">
+            <div className="brand-logo-circle">
+              <img src="/logo.png" alt="Logo" onError={(e)=>{e.target.style.display='none';}} />
+            </div>
+            <h2>The Black Stone</h2>
+            <div>
+              <span className="role-badge">
                 {userRole === 'admin' ? 'Admin / Cashier' : 'Waiter'}
               </span>
             </div>
           </div>
 
-          <nav style={{ padding: '0 12px' }}>
+          <nav className="sidebar-nav">
             {sidebarItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
+                  className="nav-item-btn"
                   style={{
-                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
                     backgroundColor: isActive ? 'rgba(197, 160, 89, 0.15)' : 'transparent',
                     color: isActive ? '#C5A059' : '#94a3b8',
-                    border: isActive ? '1px solid rgba(197, 160, 89, 0.3)' : '1px solid transparent', 
-                    borderRadius: '12px', textAlign: 'left', fontSize: '14px',
-                    fontWeight: isActive ? '700' : '500', cursor: 'pointer', marginBottom: '6px',
-                    transition: 'all 0.2s ease'
+                    border: isActive ? '1px solid rgba(197, 160, 89, 0.3)' : '1px solid transparent',
+                    fontWeight: isActive ? '700' : '500'
                   }}
                 >
                   <span style={{ fontSize: '16px' }}>{item.icon}</span>
@@ -865,40 +1564,34 @@ function App() {
           </nav>
         </div>
 
-        <div style={{ padding: '0 20px', borderTop: '1px solid #1f2937', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {userRole === 'admin' && (
-            <button onClick={handleCleanAllOrders} style={{ width: '100%', padding: '10px', backgroundColor: 'rgba(234, 179, 8, 0.15)', color: '#facc15', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
-              🧹 Clean Shift Orders
-            </button>
-          )}
-          <button onClick={handleLogout} style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-btn">
             🚪 Logout
           </button>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto', maxWidth: 'calc(100vw - 260px)' }}>
+      {/* MAIN CONTENT AREA */}
+      <main className="main-workspace">
         
         {/* 1. DASHBOARD & FINANCE */}
         {activeTab === 'dashboard' && userRole === 'admin' && (
           <div>
-            <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
+            <div className="dashboard-header-flex">
               <div>
                 <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>📊 Dashboard & Finance Overview</h1>
                 <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Track sales, expenses, and net revenue based on time intervals.</p>
               </div>
 
-              <div style={{ display: 'flex', gap: '6px', backgroundColor: '#111827', padding: '4px', borderRadius: '12px', border: '1px solid #1f2937', overflowX: 'auto' }}>
+              <div className="time-filters-bar">
                 {filterTabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setDashFilter(tab.id)}
+                    className="time-filter-btn"
                     style={{
-                      padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
                       backgroundColor: dashFilter === tab.id ? '#C5A059' : 'transparent',
-                      color: dashFilter === tab.id ? '#090d16' : '#94a3b8',
-                      whiteSpace: 'nowrap'
+                      color: dashFilter === tab.id ? '#090d16' : '#94a3b8'
                     }}
                   >
                     {tab.label}
@@ -907,43 +1600,43 @@ function App() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-              <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', borderLeft: '4px solid #34d399', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <div className="metrics-grid">
+              <div className="metric-card" style={{ borderLeft: '4px solid #34d399' }}>
                 <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '600' }}>Total Sales ({dashFilter.toUpperCase()})</span>
                 <h2 style={{ margin: '10px 0 0 0', color: '#34d399', fontSize: '26px', fontWeight: '750' }}>Rs. {totalSales}</h2>
               </div>
-              <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', borderLeft: '4px solid #f87171', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+              <div className="metric-card" style={{ borderLeft: '4px solid #f87171' }}>
                 <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '600' }}>Total Expenses ({dashFilter.toUpperCase()})</span>
                 <h2 style={{ margin: '10px 0 0 0', color: '#f87171', fontSize: '26px', fontWeight: '750' }}>Rs. {totalExpenses}</h2>
               </div>
-              <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', borderLeft: '4px solid #60a5fa', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+              <div className="metric-card" style={{ borderLeft: '4px solid #60a5fa' }}>
                 <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '600' }}>Net Balance ({dashFilter.toUpperCase()})</span>
                 <h2 style={{ margin: '10px 0 0 0', color: '#60a5fa', fontSize: '26px', fontWeight: '750' }}>Rs. {netRevenue}</h2>
               </div>
             </div>
 
-            <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <div className="card-container">
               <h3 style={{ color: '#f8fafc', margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700' }}>Live Running Orders</h3>
               {placedOrders.filter(o => o.status !== 'Billed').length > 0 ? (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div className="table-responsive-wrapper">
+                  <table className="custom-data-table">
                     <thead>
-                      <tr style={{ backgroundColor: '#090d16', textAlign: 'left', color: '#94a3b8', fontSize: '13px', borderBottom: '1px solid #1f2937' }}>
-                        <th style={{ padding: '12px' }}>Order ID</th>
-                        <th style={{ padding: '12px' }}>Location</th>
-                        <th style={{ padding: '12px' }}>Staff</th>
-                        <th style={{ padding: '12px' }}>Amount</th>
-                        <th style={{ padding: '12px' }}>Status</th>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Location</th>
+                        <th>Staff</th>
+                        <th>Amount</th>
+                        <th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {placedOrders.filter(o => o.status !== 'Billed').map((ord, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid #1f2937', fontSize: '14px' }}>
-                          <td style={{ padding: '12px', fontWeight: '600', color: '#f8fafc' }}>{ord.id}</td>
-                          <td style={{ padding: '12px', fontWeight: '600', color: '#C5A059' }}>{ord.tableNo}</td>
-                          <td style={{ padding: '12px', color: '#94a3b8' }}>{ord.waiterName}</td>
-                          <td style={{ padding: '12px', fontWeight: '700', color: '#34d399' }}>Rs. {ord.totalAmount}</td>
-                          <td style={{ padding: '12px' }}>
+                        <tr key={i}>
+                          <td style={{ fontWeight: '600', color: '#f8fafc' }}>{ord.id}</td>
+                          <td style={{ fontWeight: '600', color: '#C5A059' }}>{ord.tableNo}</td>
+                          <td style={{ color: '#94a3b8' }}>{ord.waiterName}</td>
+                          <td style={{ fontWeight: '700', color: '#34d399' }}>Rs. {ord.totalAmount}</td>
+                          <td>
                             <select
                               value={ord.status}
                               onChange={(e) => updateOrderStatus(ord.id, e.target.value)}
@@ -1065,14 +1758,14 @@ function App() {
               ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+            <div className="dual-grid-section">
               <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                 {filteredOrderData.map((category, index) => (
                   <section key={index} style={{ marginBottom: '24px' }}>
                     <h3 style={{ color: '#C5A059', borderBottom: '1px solid #1f2937', paddingBottom: '6px', marginBottom: '14px', fontSize: '16px', fontWeight: '700' }}>
                       {category.category}
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
                       {category.items.map((item, idx) => (
                         <div
                           key={idx}
@@ -1162,7 +1855,7 @@ function App() {
                     )}
                   </div>
 
-                  <button onClick={handlePlaceOrder} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(197, 160, 89, 0.3)' }}>
+                  <button onClick={handlePlaceOrder} className="gold-btn">
                     Send to Kitchen & Print KOT 🖨️
                   </button>
                 </div>
@@ -1179,7 +1872,7 @@ function App() {
               <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Configure staff salaries, track payout dates, and record disbursements automatically.</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
               <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '700', color: '#f8fafc' }}>Add New Staff Member</h3>
                 <form onSubmit={handleAddStaff}>
@@ -1217,7 +1910,7 @@ function App() {
                       style={{ width: '100%', padding: '12px', marginTop: '6px', borderRadius: '10px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', outline: 'none' }}
                     />
                   </div>
-                  <button type="submit" style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                  <button type="submit" className="gold-btn">
                     Save Staff Profile 👤
                   </button>
                 </form>
@@ -1259,24 +1952,24 @@ function App() {
             <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', border: '1px solid #1f2937' }}>
               <h3 style={{ color: '#f8fafc', margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700' }}>Staff Salaries & Payout History & Dates</h3>
               {staffList.length > 0 ? (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div className="table-responsive-wrapper">
+                  <table className="custom-data-table" style={{ minWidth: '700px' }}>
                     <thead>
-                      <tr style={{ backgroundColor: '#090d16', textAlign: 'left', color: '#94a3b8', fontSize: '13px', borderBottom: '1px solid #1f2937' }}>
-                        <th style={{ padding: '12px' }}>Staff Name (Editable)</th>
-                        <th style={{ padding: '12px' }}>Role</th>
-                        <th style={{ padding: '12px' }}>Monthly Salary</th>
-                        <th style={{ padding: '12px' }}>Total Paid So Far</th>
-                        <th style={{ padding: '12px' }}>Payout Dates & Amounts</th>
-                        <th style={{ padding: '12px' }}>Remaining Due</th>
+                      <tr>
+                        <th>Staff Name (Editable)</th>
+                        <th>Role</th>
+                        <th>Monthly Salary</th>
+                        <th>Total Paid So Far</th>
+                        <th>Payout Dates & Amounts</th>
+                        <th>Remaining Due</th>
                       </tr>
                     </thead>
                     <tbody>
                       {staffList.map((st) => {
                         const due = st.salary - st.paidAmount;
                         return (
-                          <tr key={st.id} style={{ borderBottom: '1px solid #1f2937', fontSize: '14px', verticalAlign: 'top' }}>
-                            <td style={{ padding: '12px' }}>
+                          <tr key={st.id} style={{ verticalAlign: 'top' }}>
+                            <td>
                               <input
                                 type="text"
                                 placeholder="Type staff name..."
@@ -1285,8 +1978,8 @@ function App() {
                                 style={{ width: '100%', padding: '8px 10px', backgroundColor: '#090d16', border: '1px solid #1f2937', borderRadius: '8px', color: '#fff', fontSize: '14px', outline: 'none' }}
                               />
                             </td>
-                            <td style={{ padding: '12px', color: '#C5A059' }}>{st.role}</td>
-                            <td style={{ padding: '12px', color: '#fff', fontWeight: '600' }}>
+                            <td style={{ color: '#C5A059' }}>{st.role}</td>
+                            <td style={{ color: '#fff', fontWeight: '600' }}>
                               <input
                                 type="number"
                                 value={st.salary}
@@ -1294,8 +1987,8 @@ function App() {
                                 style={{ width: '110px', padding: '8px 10px', backgroundColor: '#090d16', border: '1px solid #1f2937', borderRadius: '8px', color: '#fff', fontSize: '14px', outline: 'none' }}
                               />
                             </td>
-                            <td style={{ padding: '12px', color: '#34d399', fontWeight: '700' }}>Rs. {st.paidAmount}</td>
-                            <td style={{ padding: '12px', color: '#cbd5e1', fontSize: '12px' }}>
+                            <td style={{ color: '#34d399', fontWeight: '700' }}>Rs. {st.paidAmount}</td>
+                            <td style={{ color: '#cbd5e1', fontSize: '12px' }}>
                               {st.payoutHistory && st.payoutHistory.length > 0 ? (
                                 <ul style={{ margin: 0, paddingLeft: '16px' }}>
                                   {st.payoutHistory.map((ph, idx) => (
@@ -1308,7 +2001,7 @@ function App() {
                                 <span style={{ color: '#64748b' }}>No payouts yet</span>
                               )}
                             </td>
-                            <td style={{ padding: '12px', color: due > 0 ? '#f87171' : '#34d399', fontWeight: '700' }}>Rs. {due > 0 ? due : 0}</td>
+                            <td style={{ color: due > 0 ? '#f87171' : '#34d399', fontWeight: '700' }}>Rs. {due > 0 ? due : 0}</td>
                           </tr>
                         );
                       })}
@@ -1355,22 +2048,21 @@ function App() {
         {/* 5. DAILY EXPENSE ENTRY */}
         {activeTab === 'expenses' && userRole === 'admin' && (
           <div>
-            <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
+            <div className="filter-header-flex">
               <div>
                 <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>💸 Daily Expense & Cash-Out Entry</h1>
                 <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Easily record today's petty cash expenses and purchases.</p>
               </div>
 
-              <div style={{ display: 'flex', gap: '6px', backgroundColor: '#111827', padding: '4px', borderRadius: '12px', border: '1px solid #1f2937', overflowX: 'auto' }}>
+              <div className="time-filters-bar">
                 {filterTabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setExpenseFilter(tab.id)}
+                    className="time-filter-btn"
                     style={{
-                      padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
                       backgroundColor: expenseFilter === tab.id ? '#C5A059' : 'transparent',
-                      color: expenseFilter === tab.id ? '#090d16' : '#94a3b8',
-                      whiteSpace: 'nowrap'
+                      color: expenseFilter === tab.id ? '#090d16' : '#94a3b8'
                     }}
                   >
                     {tab.label}
@@ -1379,7 +2071,7 @@ function App() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
               <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', border: '1px solid #1f2937', height: 'fit-content', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '700', color: '#f8fafc' }}>Add New Expense</h3>
                 <form onSubmit={handleAddExpense}>
@@ -1403,7 +2095,7 @@ function App() {
                       style={{ width: '100%', padding: '12px', marginTop: '6px', borderRadius: '10px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', outline: 'none' }}
                     />
                   </div>
-                  <button type="submit" style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 15px rgba(197, 160, 89, 0.3)' }}>
+                  <button type="submit" className="gold-btn">
                     Record Expense 💾
                   </button>
                 </form>
@@ -1415,21 +2107,21 @@ function App() {
                   <span style={{ fontSize: '13px', fontWeight: '700', color: '#f87171' }}>Total: Rs. {totalExpenses}</span>
                 </div>
                 {filteredExpenseList.length > 0 ? (
-                  <div style={{ overflowX: 'auto', maxHeight: '400px' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <div className="table-responsive-wrapper" style={{ maxHeight: '400px' }}>
+                    <table className="custom-data-table" style={{ minWidth: '350px' }}>
                       <thead>
-                        <tr style={{ backgroundColor: '#090d16', textAlign: 'left', color: '#94a3b8', fontSize: '13px', borderBottom: '1px solid #1f2937' }}>
-                          <th style={{ padding: '10px' }}>Title</th>
-                          <th style={{ padding: '10px' }}>Date</th>
-                          <th style={{ padding: '10px', textAlign: 'right' }}>Amount</th>
+                        <tr>
+                          <th>Title</th>
+                          <th>Date</th>
+                          <th style={{ textAlign: 'right' }}>Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredExpenseList.map((exp) => (
-                          <tr key={exp.id} style={{ borderBottom: '1px solid #1f2937', fontSize: '14px' }}>
-                            <td style={{ padding: '10px', fontWeight: '600', color: '#f8fafc' }}>{exp.title}</td>
-                            <td style={{ padding: '10px', color: '#94a3b8', fontSize: '12px' }}>{exp.date} {exp.time}</td>
-                            <td style={{ padding: '10px', textAlign: 'right', fontWeight: '700', color: '#f87171' }}>Rs. {exp.amount}</td>
+                          <tr key={exp.id}>
+                            <td style={{ fontWeight: '600', color: '#f8fafc' }}>{exp.title}</td>
+                            <td style={{ color: '#94a3b8', fontSize: '12px' }}>{exp.date} {exp.time}</td>
+                            <td style={{ textAlign: 'right', fontWeight: '700', color: '#f87171' }}>Rs. {exp.amount}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1451,7 +2143,7 @@ function App() {
               <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Select order to generate printed receipt with logo.</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
               <div>
                 <h3 style={{ color: '#f8fafc', margin: '0 0 16px 0', fontSize: '18px' }}>Active Orders</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '70vh', overflowY: 'auto' }}>
@@ -1571,22 +2263,21 @@ function App() {
         {/* 7. ORDER HISTORY */}
         {activeTab === 'history' && userRole === 'admin' && (
           <div>
-            <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
+            <div className="filter-header-flex">
               <div>
                 <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>📅 Order History</h1>
                 <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Review past orders and completed transactions.</p>
               </div>
 
-              <div style={{ display: 'flex', gap: '6px', backgroundColor: '#111827', padding: '4px', borderRadius: '12px', border: '1px solid #1f2937', overflowX: 'auto' }}>
+              <div className="time-filters-bar">
                 {filterTabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setHistoryFilter(tab.id)}
+                    className="time-filter-btn"
                     style={{
-                      padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
                       backgroundColor: historyFilter === tab.id ? '#C5A059' : 'transparent',
-                      color: historyFilter === tab.id ? '#090d16' : '#94a3b8',
-                      whiteSpace: 'nowrap'
+                      color: historyFilter === tab.id ? '#090d16' : '#94a3b8'
                     }}
                   >
                     {tab.label}
@@ -1597,28 +2288,30 @@ function App() {
 
             <div style={{ backgroundColor: '#111827', borderRadius: '20px', overflow: 'hidden', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
               {filteredHistoryOrders.length > 0 ? (
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#090d16', textAlign: 'left', color: '#94a3b8', fontSize: '13px', borderBottom: '1px solid #1f2937' }}>
-                      <th style={{ padding: '12px' }}>Order ID</th>
-                      <th style={{ padding: '12px' }}>Location</th>
-                      <th style={{ padding: '12px' }}>Date & Time</th>
-                      <th style={{ padding: '12px' }}>Amount</th>
-                      <th style={{ padding: '12px' }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredHistoryOrders.map((ord, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid #1f2937', fontSize: '14px' }}>
-                        <td style={{ padding: '12px', fontWeight: '600', color: '#f8fafc' }}>{ord.id}</td>
-                        <td style={{ padding: '12px', color: '#C5A059', fontWeight: '600' }}>{ord.tableNo}</td>
-                        <td style={{ padding: '12px', color: '#94a3b8' }}>{ord.date} {ord.time}</td>
-                        <td style={{ padding: '12px', fontWeight: '700', color: '#34d399' }}>Rs. {ord.totalAmount}</td>
-                        <td style={{ padding: '12px', color: '#cbd5e1' }}><b>{ord.status}</b></td>
+                <div className="table-responsive-wrapper">
+                  <table className="custom-data-table" style={{ minWidth: '550px' }}>
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Location</th>
+                        <th>Date & Time</th>
+                        <th>Amount</th>
+                        <th>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredHistoryOrders.map((ord, i) => (
+                        <tr key={i}>
+                          <td style={{ fontWeight: '600', color: '#f8fafc' }}>{ord.id}</td>
+                          <td style={{ color: '#C5A059', fontWeight: '600' }}>{ord.tableNo}</td>
+                          <td style={{ color: '#94a3b8' }}>{ord.date} {ord.time}</td>
+                          <td style={{ fontWeight: '700', color: '#34d399' }}>Rs. {ord.totalAmount}</td>
+                          <td style={{ color: '#cbd5e1' }}><b>{ord.status}</b></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
                   No orders found for {historyFilter}.
@@ -1657,31 +2350,29 @@ function App() {
 
             <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
               <form onSubmit={handlePasswordChange}>
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600' }}>Current Password</label>
+                <div className="form-group">
+                  <label>Current Password</label>
                   <input
                     type="password"
                     placeholder="Enter current password"
                     value={currentPasswordInput}
                     onChange={(e) => setCurrentPasswordInput(e.target.value)}
                     required
-                    style={{ width: '100%', padding: '12px 14px', marginTop: '6px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', fontSize: '14px', outline: 'none' }}
                   />
                 </div>
 
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600' }}>New Password</label>
+                <div className="form-group" style={{ marginBottom: '24px' }}>
+                  <label>New Password</label>
                   <input
                     type="password"
                     placeholder="Enter new password (min 4 chars)"
                     value={newPasswordInput}
                     onChange={(e) => setNewPasswordInput(e.target.value)}
                     required
-                    style={{ width: '100%', padding: '12px 14px', marginTop: '6px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', fontSize: '14px', outline: 'none' }}
                   />
                 </div>
 
-                <button type="submit" style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '15px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(197, 160, 89, 0.3)' }}>
+                <button type="submit" className="gold-btn">
                   Update Password 🔒
                 </button>
               </form>
