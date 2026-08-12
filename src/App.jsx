@@ -1,3 +1,5 @@
+export const API_URL = "https://the-black-stone.onrender.com";
+
 import React, { useState, useEffect, useRef } from 'react';
 import menuData from './menuData';
 
@@ -89,7 +91,7 @@ function App() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/orders'); // Adjust backend URL if needed
+      const res = await fetch(`${API_URL}/api/orders`);
       if (res.ok) {
         const data = await res.json();
         setPlacedOrders(data);
@@ -102,7 +104,7 @@ function App() {
 
   const fetchExpenses = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/expenses');
+      const res = await fetch(`${API_URL}/api/expenses`);
       if (res.ok) {
         const data = await res.json();
         setExpenses(data);
@@ -114,7 +116,7 @@ function App() {
 
   const fetchStaff = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/staff');
+      const res = await fetch(`${API_URL}/api/staff`);
       if (res.ok) {
         const data = await res.json();
         if (data && data.length > 0) setStaffList(data);
@@ -126,7 +128,7 @@ function App() {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/settings');
+      const res = await fetch(`${API_URL}/api/settings`);
       if (res.ok) {
         const data = await res.json();
         if (data.password) setStoredPassword(data.password);
@@ -234,7 +236,7 @@ function App() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/settings', {
+      const res = await fetch(`${API_URL}/api/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: newPasswordInput })
@@ -339,7 +341,7 @@ function App() {
     );
   }
 
-  // ================= CUSTOMER QR SELF-ORDERING VIEW (EXTREMELY POLISHED & RESPONSIVE) =================
+  // ================= CUSTOMER QR SELF-ORDERING VIEW =================
   if (customerTable) {
     const addToCustomerCart = (item) => {
       const existing = customerCart.find((c) => c.name === item.name);
@@ -380,7 +382,7 @@ function App() {
       };
 
       try {
-        const res = await fetch('http://localhost:5000/api/orders', {
+        const res = await fetch(`${API_URL}/api/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newOrder)
@@ -635,7 +637,7 @@ function App() {
     };
 
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${activeCabinOrder.id}`, {
+      const res = await fetch(`${API_URL}/api/orders/${activeCabinOrder.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedOrderPayload)
@@ -661,7 +663,7 @@ function App() {
     };
 
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${activeCabinOrder.id}`, {
+      const res = await fetch(`${API_URL}/api/orders/${activeCabinOrder.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedOrderPayload)
@@ -716,7 +718,7 @@ function App() {
       };
 
       try {
-        await fetch(`http://localhost:5000/api/orders/${activeCabinOrder.id}`, {
+        await fetch(`${API_URL}/api/orders/${activeCabinOrder.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(targetOrder)
@@ -739,7 +741,7 @@ function App() {
       };
 
       try {
-        await fetch('http://localhost:5000/api/orders', {
+        await fetch(`${API_URL}/api/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(targetOrder)
@@ -800,7 +802,7 @@ function App() {
     const updatedPayload = { ...ordToUpdate, status: newStatus };
 
     try {
-      await fetch(`http://localhost:5000/api/orders/${orderId}`, {
+      await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedPayload)
@@ -828,7 +830,7 @@ function App() {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/expenses', {
+      const res = await fetch(`${API_URL}/api/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newExp)
@@ -859,7 +861,7 @@ function App() {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/staff', {
+      const res = await fetch(`${API_URL}/api/staff`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStaff)
@@ -890,7 +892,7 @@ function App() {
     const staffMember = updatedStaffList.find(s => s.id === id);
     if (staffMember) {
       try {
-        await fetch(`http://localhost:5000/api/staff/${id}`, {
+        await fetch(`${API_URL}/api/staff/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(staffMember)
@@ -926,7 +928,7 @@ function App() {
     };
 
     try {
-      await fetch(`http://localhost:5000/api/staff/${staffMember.id}`, {
+      await fetch(`${API_URL}/api/staff/${staffMember.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedStaffMember)
@@ -946,7 +948,7 @@ function App() {
     };
 
     try {
-      await fetch('http://localhost:5000/api/expenses', {
+      await fetch(`${API_URL}/api/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newExp)
@@ -2215,14 +2217,44 @@ function App() {
           <div>
             <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>📜 Digital Menu Card</h1>
             <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>Browse categories and items properly organized.</p>
+            
+            <div style={{ marginBottom: '20px', maxWidth: '400px' }}>
+              <input
+                type="text"
+                placeholder="🔍 Search menu items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#111827', color: '#fff', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '24px', paddingBottom: '6px' }}>
+              {categories.map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    padding: '8px 18px', borderRadius: '20px', border: selectedCategory === cat ? '1px solid #C5A059' : '1px solid #1f2937',
+                    backgroundColor: selectedCategory === cat ? '#C5A059' : '#111827',
+                    color: selectedCategory === cat ? '#090d16' : '#94a3b8',
+                    fontWeight: selectedCategory === cat ? '700' : '500', cursor: 'pointer', whiteSpace: 'nowrap'
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
             {filteredData.map((category, index) => (
               <section key={index} style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#C5A059', borderBottom: '1px solid #1f2937', paddingBottom: '8px', marginBottom: '16px', fontSize: '18px', fontWeight: '700' }}>{category.category}</h3>
+                <h3 style={{ color: '#C5A059', borderBottom: '1px solid #1f2937', paddingBottom: '8px', marginBottom: '16px', fontSize: '18px', fontWeight: '700' }}>
+                  {category.category}
+                </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-                  {category.items.map((item, itemIdx) => (
-                    <div key={itemIdx} style={{ backgroundColor: '#111827', borderRadius: '16px', padding: '18px', border: '1px solid #1f2937', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
-                      <h3 style={{ fontSize: '15px', margin: '0 0 8px 0', color: '#f8fafc', fontWeight: '600' }}>{item.name}</h3>
-                      <p style={{ fontWeight: '700', color: '#34d399', margin: 0, fontSize: '15px' }}>Rs. {item.price}</p>
+                  {category.items.map((item, idx) => (
+                    <div key={idx} style={{ backgroundColor: '#111827', padding: '16px', borderRadius: '16px', border: '1px solid #1f2937', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                      <div style={{ fontWeight: '600', fontSize: '15px', color: '#f8fafc', marginBottom: '8px' }}>{item.name}</div>
+                      <div style={{ fontSize: '15px', fontWeight: '700', color: '#34d399' }}>Rs. {item.price}</div>
                     </div>
                   ))}
                 </div>
@@ -2231,32 +2263,36 @@ function App() {
           </div>
         )}
 
-        {/* 9. CHANGE PASSWORD SETTINGS */}
-        {activeTab === 'settings' && userRole !== 'waiter' && (
-          <div style={{ maxWidth: '480px' }}>
-            <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>⚙️ Security & Password</h1>
-            <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>Update your portal login password securely.</p>
+        {/* 9. SETTINGS & PASSWORD */}
+        {activeTab === 'settings' && userRole === 'admin' && (
+          <div style={{ maxWidth: '500px' }}>
+            <div style={{ marginBottom: '24px' }}>
+              <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>⚙️ Security & Settings</h1>
+              <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Update your admin panel access password.</p>
+            </div>
 
             <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '20px', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
               <form onSubmit={handlePasswordChange}>
-                <div className="form-group">
-                  <label>Current Password</label>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Current Password</label>
                   <input
                     type="password"
                     placeholder="Enter current password"
                     value={currentPasswordInput}
                     onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', fontSize: '14px', outline: 'none' }}
                     required
                   />
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '24px' }}>
-                  <label>NewPassword</label>
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600', display: 'block', marginBottom: '6px' }}>New Password (min 4 chars)</label>
                   <input
                     type="password"
-                    placeholder="Enter new password (min 4 chars)"
+                    placeholder="Enter new password"
                     value={newPasswordInput}
                     onChange={(e) => setNewPasswordInput(e.target.value)}
+                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #1f2937', backgroundColor: '#090d16', color: '#fff', fontSize: '14px', outline: 'none' }}
                     required
                   />
                 </div>
@@ -2268,6 +2304,7 @@ function App() {
             </div>
           </div>
         )}
+
       </main>
     </div>
   );
