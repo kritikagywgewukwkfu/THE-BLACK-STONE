@@ -2,24 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import menuData from './menuData';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('bs_isLoggedIn') === 'true';
-  });
-  
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  // Login Page State (Initially false so login page shows first)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginRole, setLoginRole] = useState('admin'); // 'admin' or 'waiter'
+  const [loginPasswordInput, setLoginPasswordInput] = useState('');
 
   // Password Management State
-  const [storedPassword, setStoredPassword] = useState(() => {
-    return localStorage.getItem('bs_password') || 'admin123';
-  });
+  const [storedPassword, setStoredPassword] = useState('admin123');
   const [currentPasswordInput, setCurrentPasswordInput] = useState('');
   const [newPasswordInput, setNewPasswordInput] = useState('');
 
-  // Staff Role State ('admin', 'waiter') - Cashier merged into Admin
-  const [userRole, setUserRole] = useState(() => {
-    return localStorage.getItem('bs_userRole') || 'admin';
-  });
+  // Staff Role State ('admin', 'cashier', 'waiter')
+  const [userRole, setUserRole] = useState('admin');
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,26 +38,17 @@ function App() {
   const [currentCart, setCurrentCart] = useState([]);
   
   // Clean Data Reset: Initialized to empty array
-  const [placedOrders, setPlacedOrders] = useState(() => {
-    const saved = localStorage.getItem('bs_placedOrders');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [placedOrders, setPlacedOrders] = useState([]);
 
   // Clean Data Reset: Initialized to empty array
-  const [expenses, setExpenses] = useState(() => {
-    const saved = localStorage.getItem('bs_expenses');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [expenses, setExpenses] = useState([]);
 
   // Clean Data Reset: Initialized with blank names and zero values
-  const [staffList, setStaffList] = useState(() => {
-    const saved = localStorage.getItem('bs_staffList');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: '', role: 'Waiter', salary: 0, paidAmount: 0, payoutHistory: [] },
-      { id: 2, name: '', role: 'Chef', salary: 0, paidAmount: 0, payoutHistory: [] },
-      { id: 3, name: '', role: 'Cashier', salary: 0, paidAmount: 0, payoutHistory: [] }
-    ];
-  });
+  const [staffList, setStaffList] = useState([
+    { id: 1, name: '', role: 'Waiter', salary: 0, paidAmount: 0, payoutHistory: [] },
+    { id: 2, name: '', role: 'Chef', salary: 0, paidAmount: 0, payoutHistory: [] },
+    { id: 3, name: '', role: 'Cashier', salary: 0, paidAmount: 0, payoutHistory: [] }
+  ]);
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffRole, setNewStaffRole] = useState('Waiter');
   const [newStaffSalary, setNewStaffSalary] = useState('');
@@ -73,7 +58,7 @@ function App() {
   const [expenseTitle, setExpenseTitle] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
 
-  const prevOrdersLenRef = useRef(placedOrders.length);
+  const prevOrdersLenRef = useRef(0);
   const [selectedBill, setSelectedBill] = useState(null);
 
   // Mobile Hamburger Sidebar Toggle State
@@ -85,6 +70,65 @@ function App() {
   const [customerCategory, setCustomerCategory] = useState('All');
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [customerOrderPlaced, setCustomerOrderPlaced] = useState(false);
+
+  // ================= API FETCH FUNCTIONS (Replacing localStorage) =================
+
+  // 1. Fetch initial data on load
+  useEffect(() => {
+    fetchOrders();
+    fetchExpenses();
+    fetchStaff();
+    fetchSettings();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/orders'); // Adjust backend URL if needed
+      if (res.ok) {
+        const data = await res.json();
+        setPlacedOrders(data);
+        prevOrdersLenRef.current = data.length;
+      }
+    } catch (e) {
+      console.error('Error fetching orders:', e);
+    }
+  };
+
+  const fetchExpenses = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/expenses');
+      if (res.ok) {
+        const data = await res.json();
+        setExpenses(data);
+      }
+    } catch (e) {
+      console.error('Error fetching expenses:', e);
+    }
+  };
+
+  const fetchStaff = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/staff');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) setStaffList(data);
+      }
+    } catch (e) {
+      console.error('Error fetching staff:', e);
+    }
+  };
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/settings');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.password) setStoredPassword(data.password);
+      }
+    } catch (e) {
+      console.error('Error fetching settings:', e);
+    }
+  };
 
   // Web Audio API Beep Sound Generator for KOT Alerts
   const playBeep = () => {
@@ -110,29 +154,13 @@ function App() {
     }
   };
 
+  // Check new orders length for audio alert via ref
   useEffect(() => {
-    localStorage.setItem('bs_placedOrders', JSON.stringify(placedOrders));
     if (placedOrders.length > prevOrdersLenRef.current) {
       playBeep();
     }
     prevOrdersLenRef.current = placedOrders.length;
   }, [placedOrders]);
-
-  useEffect(() => {
-    localStorage.setItem('bs_expenses', JSON.stringify(expenses));
-  }, [expenses]);
-
-  useEffect(() => {
-    localStorage.setItem('bs_userRole', userRole);
-  }, [userRole]);
-
-  useEffect(() => {
-    localStorage.setItem('bs_staffList', JSON.stringify(staffList));
-  }, [staffList]);
-
-  useEffect(() => {
-    localStorage.setItem('bs_password', storedPassword);
-  }, [storedPassword]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -143,7 +171,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (userRole === 'waiter' && activeTab === 'dashboard') {
+    if (userRole === 'waiter' && (activeTab === 'dashboard' || activeTab === 'settings')) {
       setActiveTab('order');
     }
   }, [userRole, activeTab]);
@@ -188,21 +216,7 @@ function App() {
     return true;
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (loginEmail && loginPassword) {
-      if (loginPassword !== storedPassword) {
-        alert('Incorrect password! Please try again.');
-        return;
-      }
-      setIsLoggedIn(true);
-      localStorage.setItem('bs_isLoggedIn', 'true');
-    } else {
-      alert('Please enter credentials!');
-    }
-  };
-
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (currentPasswordInput !== storedPassword) {
       alert('Current password does not match!');
@@ -212,16 +226,112 @@ function App() {
       alert('New password must be at least 4 characters long!');
       return;
     }
-    setStoredPassword(newPasswordInput);
-    setCurrentPasswordInput('');
-    setNewPasswordInput('');
-    alert('Password updated successfully!');
+
+    try {
+      const res = await fetch('http://localhost:5000/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPasswordInput })
+      });
+      if (res.ok) {
+        setStoredPassword(newPasswordInput);
+        setCurrentPasswordInput('');
+        setNewPasswordInput('');
+        alert('Password updated successfully!');
+      } else {
+        alert('Failed to update password on server.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error while updating password.');
+    }
+  };
+
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    if (loginRole === 'admin') {
+      if (loginPasswordInput !== storedPassword) {
+        alert('Incorrect Admin Password! (Default: admin123)');
+        return;
+      }
+      setUserRole('admin');
+      setActiveTab('dashboard');
+    } else {
+      setUserRole('waiter');
+      setActiveTab('order');
+    }
+    setIsLoggedIn(true);
+    setLoginPasswordInput('');
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem('bs_isLoggedIn');
   };
+
+  // ================= LOGIN PAGE =================
+  if (!isLoggedIn && !customerTable) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#090d16', padding: '20px', fontFamily: 'Inter, sans-serif' }}>
+        <style>{`
+          .login-card { background: #111827; border: 1px solid #1f2937; padding: 32px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); color: #f8fafc; }
+          .role-toggle-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #1f2937; background: #090d16; color: #94a3b8; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+          .role-toggle-btn.active { background: #C5A059; color: #090d16; border-color: #C5A059; font-weight: 700; }
+        `}</style>
+        <div className="login-card">
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <div style={{ width: '60px', height: '60px', margin: '0 auto 12px auto', borderRadius: '50%', border: '2px solid #C5A059', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#090d16' }}>
+              <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} onError={(e)=>{e.target.style.display='none';}} />
+            </div>
+            <h2 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '750', color: '#fff' }}>The Black Stone</h2>
+            <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>Select your role to sign in</p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <button 
+              type="button" 
+              className={`role-toggle-btn ${loginRole === 'admin' ? 'active' : ''}`}
+              onClick={() => setLoginRole('admin')}
+            >
+              👑 Admin
+            </button>
+            <button 
+              type="button" 
+              className={`role-toggle-btn ${loginRole === 'waiter' ? 'active' : ''}`}
+              onClick={() => setLoginRole('waiter')}
+            >
+              🍽️ Waiter
+            </button>
+          </div>
+
+          <form onSubmit={handleLoginSubmit}>
+            {loginRole === 'admin' && (
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '13px', color: '#cbd5e1', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Admin Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Enter password (default: admin123)"
+                  value={loginPasswordInput}
+                  onChange={(e) => setLoginPasswordInput(e.target.value)}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid #1f2937', background: '#090d16', color: '#fff', fontSize: '14px', outline: 'none' }}
+                  required
+                />
+              </div>
+            )}
+
+            {loginRole === 'waiter' && (
+              <div style={{ marginBottom: '20px', padding: '12px', background: 'rgba(197, 160, 89, 0.1)', border: '1px solid rgba(197, 160, 89, 0.2)', borderRadius: '12px' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: '#C5A059', textAlign: 'center' }}>Waiter panel provides quick access to table orders and KOT generation.</p>
+              </div>
+            )}
+
+            <button type="submit" style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '15px', cursor: 'pointer', boxShadow: '0 4px 20px rgba(197, 160, 89, 0.4)' }}>
+              Login as {loginRole === 'admin' ? 'Admin' : 'Waiter'} 🚀
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   // ================= CUSTOMER QR SELF-ORDERING VIEW =================
   if (customerTable) {
@@ -244,7 +354,7 @@ function App() {
       }).filter(Boolean));
     };
 
-    const handleCustomerSubmitOrder = () => {
+    const handleCustomerSubmitOrder = async () => {
       if (customerCart.length === 0) {
         alert('Please select at least one item!');
         return;
@@ -263,12 +373,23 @@ function App() {
         time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
-      const existingOrders = JSON.parse(localStorage.getItem('bs_placedOrders') || '[]');
-      localStorage.setItem('bs_placedOrders', JSON.stringify([newOrder, ...existingOrders]));
-      setPlacedOrders([newOrder, ...existingOrders]);
-
-      setCustomerOrderPlaced(true);
-      setCustomerCart([]);
+      try {
+        const res = await fetch('http://localhost:5000/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newOrder)
+        });
+        if (res.ok) {
+          fetchOrders();
+          setCustomerOrderPlaced(true);
+          setCustomerCart([]);
+        } else {
+          alert('Failed to place order.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error while placing order.');
+      }
     };
 
     const customerCategories = ['All', ...menuData.map((cat) => cat.category)];
@@ -464,7 +585,7 @@ function App() {
     (ord) => ord.tableNo === tableNo && ord.status !== 'Billed'
   );
 
-  const updateActiveCabinItemQty = (itemName, delta) => {
+  const updateActiveCabinItemQty = async (itemName, delta) => {
     if (!activeCabinOrder) return;
     
     const updatedItems = activeCabinOrder.items.map(it => {
@@ -477,41 +598,53 @@ function App() {
 
     const newTotalAmount = updatedItems.reduce((sum, it) => sum + (it.price * it.qty), 0);
 
-    const updatedOrders = placedOrders.map(ord => {
-      if (ord.id === activeCabinOrder.id) {
-        return {
-          ...ord,
-          items: updatedItems,
-          totalAmount: newTotalAmount
-        };
-      }
-      return ord;
-    });
+    const updatedOrderPayload = {
+      ...activeCabinOrder,
+      items: updatedItems,
+      totalAmount: newTotalAmount
+    };
 
-    setPlacedOrders(updatedOrders);
+    try {
+      const res = await fetch(`http://localhost:5000/api/orders/${activeCabinOrder.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedOrderPayload)
+      });
+      if (res.ok) {
+        fetchOrders();
+      }
+    } catch (e) {
+      console.error('Error updating order item qty:', e);
+    }
   };
 
-  const removeActiveCabinItem = (itemName) => {
+  const removeActiveCabinItem = async (itemName) => {
     if (!activeCabinOrder) return;
     
     const updatedItems = activeCabinOrder.items.filter(it => it.name !== itemName);
     const newTotalAmount = updatedItems.reduce((sum, it) => sum + (it.price * it.qty), 0);
 
-    const updatedOrders = placedOrders.map(ord => {
-      if (ord.id === activeCabinOrder.id) {
-        return {
-          ...ord,
-          items: updatedItems,
-          totalAmount: newTotalAmount
-        };
-      }
-      return ord;
-    });
+    const updatedOrderPayload = {
+      ...activeCabinOrder,
+      items: updatedItems,
+      totalAmount: newTotalAmount
+    };
 
-    setPlacedOrders(updatedOrders);
+    try {
+      const res = await fetch(`http://localhost:5000/api/orders/${activeCabinOrder.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedOrderPayload)
+      });
+      if (res.ok) {
+        fetchOrders();
+      }
+    } catch (e) {
+      console.error('Error removing order item:', e);
+    }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (currentCart.length === 0) {
       alert('Please select at least one item!');
       return;
@@ -544,23 +677,26 @@ function App() {
       const mergedItems = Object.values(updatedItemsMap);
       const newTotalAmount = mergedItems.reduce((sum, it) => sum + (it.price * it.qty), 0);
 
-      const updatedOrders = placedOrders.map(ord => {
-        if (ord.id === activeCabinOrder.id) {
-          return {
-            ...ord,
-            items: mergedItems,
-            totalAmount: newTotalAmount,
-            waiterName: waiterName,
-            status: 'Kitchen'
-          };
-        }
-        return ord;
-      });
+      targetOrder = {
+        ...activeCabinOrder,
+        items: mergedItems,
+        totalAmount: newTotalAmount,
+        waiterName: waiterName,
+        status: 'Kitchen'
+      };
 
-      setPlacedOrders(updatedOrders);
-      targetOrder = updatedOrders.find(o => o.id === activeCabinOrder.id);
+      try {
+        await fetch(`http://localhost:5000/api/orders/${activeCabinOrder.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(targetOrder)
+        });
+        fetchOrders();
+      } catch (e) {
+        console.error('Error merging cabin order:', e);
+      }
     } else {
-      const newOrder = {
+      targetOrder = {
         id: `ORD-${Date.now().toString().slice(-4)}`,
         tableNo,
         waiterName,
@@ -572,9 +708,16 @@ function App() {
         time: currentTimeStr
       };
 
-      const updated = [newOrder, ...placedOrders];
-      setPlacedOrders(updated);
-      targetOrder = newOrder;
+      try {
+        await fetch('http://localhost:5000/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(targetOrder)
+        });
+        fetchOrders();
+      } catch (e) {
+        console.error('Error creating new order:', e);
+      }
     }
 
     printKOTTicket(targetOrder || { tableNo, waiterName, items: currentCart });
@@ -621,14 +764,24 @@ function App() {
     printWindow.document.close();
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    const updated = placedOrders.map((ord) =>
-      ord.id === orderId ? { ...ord, status: newStatus } : ord
-    );
-    setPlacedOrders(updated);
+  const updateOrderStatus = async (orderId, newStatus) => {
+    const ordToUpdate = placedOrders.find(o => o.id === orderId);
+    if (!ordToUpdate) return;
+    const updatedPayload = { ...ordToUpdate, status: newStatus };
+
+    try {
+      await fetch(`http://localhost:5000/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedPayload)
+      });
+      fetchOrders();
+    } catch (e) {
+      console.error('Error updating status:', e);
+    }
   };
 
-  const handleAddExpense = (e) => {
+  const handleAddExpense = async (e) => {
     e.preventDefault();
     if (!expenseTitle || !expenseAmount) {
       alert('Please fill both expense title and amount!');
@@ -643,12 +796,24 @@ function App() {
       date: now.toLocaleDateString(),
       time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    setExpenses([newExp, ...expenses]);
-    setExpenseTitle('');
-    setExpenseAmount('');
+
+    try {
+      const res = await fetch('http://localhost:5000/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newExp)
+      });
+      if (res.ok) {
+        fetchExpenses();
+        setExpenseTitle('');
+        setExpenseAmount('');
+      }
+    } catch (e) {
+      console.error('Error adding expense:', e);
+    }
   };
 
-  const handleAddStaff = (e) => {
+  const handleAddStaff = async (e) => {
     e.preventDefault();
     if (!newStaffName || !newStaffSalary) {
       alert('Please provide staff name and salary!');
@@ -662,14 +827,26 @@ function App() {
       paidAmount: 0,
       payoutHistory: []
     };
-    setStaffList([...staffList, newStaff]);
-    setNewStaffName('');
-    setNewStaffSalary('');
-    alert('Staff added successfully!');
+
+    try {
+      const res = await fetch('http://localhost:5000/api/staff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStaff)
+      });
+      if (res.ok) {
+        fetchStaff();
+        setNewStaffName('');
+        setNewStaffSalary('');
+        alert('Staff added successfully!');
+      }
+    } catch (e) {
+      console.error('Error adding staff:', e);
+    }
   };
 
-  const handleUpdateStaffField = (id, field, value) => {
-    setStaffList(staffList.map(st => {
+  const handleUpdateStaffField = async (id, field, value) => {
+    const updatedStaffList = staffList.map(st => {
       if (st.id === id) {
         return { 
           ...st, 
@@ -677,10 +854,24 @@ function App() {
         };
       }
       return st;
-    }));
+    });
+    setStaffList(updatedStaffList);
+
+    const staffMember = updatedStaffList.find(s => s.id === id);
+    if (staffMember) {
+      try {
+        await fetch(`http://localhost:5000/api/staff/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(staffMember)
+        });
+      } catch (e) {
+        console.error('Error updating staff member field:', e);
+      }
+    }
   };
 
-  const handleRecordSalaryPayout = (e) => {
+  const handleRecordSalaryPayout = async (e) => {
     e.preventDefault();
     if (!payoutStaffId || !payoutAmount) {
       alert('Please select staff and enter payout amount!');
@@ -698,17 +889,22 @@ function App() {
       time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    const updatedStaff = staffList.map(s => {
-      if (s.id === Number(payoutStaffId)) {
-        return { 
-          ...s, 
-          paidAmount: s.paidAmount + amountNum,
-          payoutHistory: [...(s.payoutHistory || []), payoutRecord]
-        };
-      }
-      return s;
-    });
-    setStaffList(updatedStaff);
+    const updatedStaffMember = {
+      ...staffMember,
+      paidAmount: staffMember.paidAmount + amountNum,
+      payoutHistory: [...(staffMember.payoutHistory || []), payoutRecord]
+    };
+
+    try {
+      await fetch(`http://localhost:5000/api/staff/${staffMember.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedStaffMember)
+      });
+      fetchStaff();
+    } catch (e) {
+      console.error('Error recording payout:', e);
+    }
 
     const newExp = {
       id: Date.now(),
@@ -718,7 +914,17 @@ function App() {
       date: now.toLocaleDateString(),
       time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    setExpenses([newExp, ...expenses]);
+
+    try {
+      await fetch('http://localhost:5000/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newExp)
+      });
+      fetchExpenses();
+    } catch (e) {
+      console.error('Error recording payout expense:', e);
+    }
 
     setPayoutStaffId('');
     setPayoutAmount('');
@@ -733,53 +939,17 @@ function App() {
   const totalExpenses = filteredExpenseList.reduce((sum, exp) => sum + exp.amount, 0);
   const netRevenue = totalSales - totalExpenses;
 
-  if (!isLoggedIn) {
-    return (
-      <div className="login-wrapper">
-        <form onSubmit={handleLogin} className="login-card">
-          <div className="login-logo-container">
-            <img src="/logo.png" alt="Logo" onError={(e)=>{e.target.style.display='none';}} />
-          </div>
-          <h2>The Black Stone</h2>
-          <p>Unified POS & Management Portal</p>
-          
-          <div className="form-group">
-            <label>Email Address</label>
-            <input type="email" placeholder="admin@blackstone.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
-          </div>
-
-          <div className="form-group">
-            <label>Password</label>
-            <input type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
-          </div>
-
-          <div className="form-group">
-            <label>Staff Role & Permissions</label>
-            <select value={userRole} onChange={(e) => setUserRole(e.target.value)}>
-              <option value="admin">👑 Admin & Cashier (Full Access)</option>
-              <option value="waiter">📝 Waiter (Orders & Status)</option>
-            </select>
-          </div>
-
-          <button type="submit" className="gold-btn">
-            Login to System
-          </button>
-        </form>
-      </div>
-    );
-  }
-
   const allSidebarItems = [
     { id: 'dashboard', label: 'Dashboard & Finance', icon: '📊', roles: ['admin'] },
-    { id: 'tables', label: 'Table & Cabin Status', icon: '🪑', roles: ['admin', 'waiter'] },
+    { id: 'tables', label: 'Table & Cabin Status', icon: '🪑', roles: ['admin', 'cashier', 'waiter'] },
     { id: 'order', label: 'Order & KOT', icon: '📝', roles: ['admin', 'waiter'] },
     { id: 'salary', label: 'Staff & Salary Mgmt', icon: '💰', roles: ['admin'] },
     { id: 'qr-menu', label: 'QR Menu Setup', icon: '📱', roles: ['admin'] },
-    { id: 'expenses', label: 'Daily Expense Entry', icon: '💸', roles: ['admin'] },
-    { id: 'billing', label: 'Billing & Receipt', icon: '🧾', roles: ['admin'] },
-    { id: 'history', label: 'Order History', icon: '📅', roles: ['admin'] },
-    { id: 'menu', label: 'Menu Card', icon: '📜', roles: ['admin', 'waiter'] },
-    { id: 'settings', label: 'Change Password', icon: '⚙️', roles: ['admin', 'waiter'] },
+    { id: 'expenses', label: 'Daily Expense Entry', icon: '💸', roles: ['admin', 'cashier'] },
+    { id: 'billing', label: 'Billing & Receipt', icon: '🧾', roles: ['admin', 'cashier'] },
+    { id: 'history', label: 'Order History', icon: '📅', roles: ['admin', 'cashier'] },
+    { id: 'menu', label: 'Menu Card', icon: '📜', roles: ['admin', 'cashier', 'waiter'] },
+    { id: 'settings', label: 'Change Password', icon: '⚙️', roles: ['admin', 'cashier'] },
   ];
 
   const sidebarItems = allSidebarItems.filter(item => item.roles.includes(userRole));
@@ -810,7 +980,6 @@ function App() {
         ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #C5A059; }
 
-        /* Modern Responsive CSS Architecture */
         .app-layout {
           display: flex;
           min-height: 100vh;
@@ -818,7 +987,6 @@ function App() {
           position: relative;
         }
 
-        /* Desktop Sidebar */
         .desktop-sidebar {
           width: 260px;
           background-color: #111827;
@@ -920,7 +1088,6 @@ function App() {
           cursor: pointer;
         }
 
-        /* Mobile Navbar & Hamburger */
         .mobile-navbar {
           display: none;
           background-color: #111827;
@@ -983,7 +1150,6 @@ function App() {
           justify-content: space-between;
         }
 
-        /* Main Workspace Content Area */
         .main-workspace {
           flex: 1;
           padding: 32px;
@@ -992,7 +1158,6 @@ function App() {
           max-width: 100%;
         }
 
-        /* Common Components Styling */
         .gold-btn {
           width: 100%;
           padding: 14px;
@@ -1004,47 +1169,6 @@ function App() {
           font-size: 15px;
           cursor: pointer;
           box-shadow: 0 4px 20px rgba(197, 160, 89, 0.4);
-        }
-
-        .login-wrapper {
-          height: 100vh;
-          background-color: #090d16;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 16px;
-          width: 100vw;
-        }
-
-        .login-card {
-          background-color: #111827;
-          padding: 40px 32px;
-          border-radius: 24px;
-          border: 1px solid rgba(197, 160, 89, 0.3);
-          box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-          width: 100%;
-          max-width: 400px;
-          text-align: center;
-        }
-
-        .login-logo-container {
-          width: 70px;
-          height: 70px;
-          background-color: #090d16;
-          border-radius: 50%;
-          margin: 0 auto 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          border: 2px solid #C5A059;
-          box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
-        }
-
-        .login-logo-container img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
         }
 
         .form-group {
@@ -1070,7 +1194,6 @@ function App() {
           outline: none;
         }
 
-        /* Dashboard Flex & Grid Systems */
         .dashboard-header-flex, .filter-header-flex {
           display: flex;
           justify-content: space-between;
@@ -1116,7 +1239,6 @@ function App() {
           white-space: nowrap;
         }
 
-        /* Responsive Cards and Tables */
         .card-container {
           background-color: #111827;
           padding: 24px;
@@ -1152,7 +1274,6 @@ function App() {
           font-size: 14px;
         }
 
-        /* Dual Grid Layouts for Order & Management */
         .dual-grid-section {
           display: grid;
           grid-template-columns: 1fr 380px;
@@ -1165,296 +1286,6 @@ function App() {
           }
         }
 
-        /* Customer Portal Styles */
-        .customer-portal {
-          max-width: 480px;
-          margin: 0 auto;
-          padding: 16px;
-          background-color: #090d16;
-          min-height: 100vh;
-          color: #f8fafc;
-        }
-
-        .customer-header {
-          text-align: center;
-          margin-bottom: 16px;
-          background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-          color: #fff;
-          padding: 24px 20px;
-          border-radius: 24px;
-          border: 1px solid rgba(197, 160, 89, 0.3);
-          box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-
-        .customer-logo {
-          width: 60px;
-          height: 60px;
-          margin: 0 auto 10px auto;
-          border-radius: 50%;
-          overflow: hidden;
-          border: 2px solid #C5A059;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: #111827;
-        }
-
-        .customer-logo img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .customer-table-badge {
-          margin-top: 12px;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background-color: rgba(59, 130, 246, 0.15);
-          border: 1px solid #3b82f6;
-          color: #60a5fa;
-          padding: 6px 16px;
-          border-radius: 30px;
-          font-size: 13px;
-          font-weight: 600;
-        }
-
-        .customer-success-card {
-          text-align: center;
-          background-color: #111827;
-          padding: 40px 24px;
-          border-radius: 24px;
-          border: 1px solid #1f2937;
-          margin-top: 20px;
-        }
-
-        .success-icon {
-          font-size: 48px;
-          margin-bottom: 12px;
-        }
-
-        .live-tracking-card {
-          background-color: #111827;
-          border: 1px solid #1f2937;
-          border-radius: 20px;
-          padding: 16px;
-          margin-bottom: 16px;
-        }
-
-        .tracking-header {
-          font-weight: 700;
-          font-size: 14px;
-          color: #f8fafc;
-          margin-bottom: 10px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .tracking-status-badge {
-          font-size: 12px;
-          background: rgba(59, 130, 246, 0.2);
-          color: #60a5fa;
-          padding: 2px 10px;
-          border-radius: 6px;
-          border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .tracking-item {
-          font-size: 13px;
-          padding: 8px 0;
-          border-bottom: 1px solid #1f2937;
-        }
-
-        .tracking-item-top {
-          display: flex;
-          justify-content: space-between;
-          font-weight: 600;
-          color: #e2e8f0;
-          margin-bottom: 4px;
-        }
-
-        .tracking-item-desc {
-          color: #94a3b8;
-          font-size: 12px;
-        }
-
-        .search-container {
-          margin-bottom: 14px;
-        }
-
-        .search-container input {
-          width: 100%;
-          padding: 12px 16px;
-          border-radius: 14px;
-          border: 1px solid #1f2937;
-          background-color: #111827;
-          color: #fff;
-          font-size: 14px;
-          outline: none;
-        }
-
-        .category-chips {
-          display: flex;
-          gap: 8px;
-          overflow-x: auto;
-          margin-bottom: 16px;
-          padding-bottom: 4px;
-        }
-
-        .category-chip {
-          padding: 8px 16px;
-          border-radius: 20px;
-          white-space: nowrap;
-          font-size: 13px;
-          cursor: pointer;
-        }
-
-        .category-chip.active {
-          background-color: #C5A059;
-          color: #090d16;
-          font-weight: 700;
-          border: 1px solid #C5A059;
-        }
-
-        .category-chip:not(.active) {
-          background-color: #111827;
-          color: #94a3b8;
-          border: 1px solid #1f2937;
-          font-weight: 500;
-        }
-
-        .customer-menu-list {
-          margin-bottom: 110px;
-        }
-
-        .menu-category-group h4 {
-          color: #C5A059;
-          border-bottom: 1px solid #1f2937;
-          padding-bottom: 6px;
-          margin-bottom: 12px;
-          font-size: 16px;
-          font-weight: 700;
-        }
-
-        .menu-items-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .menu-item-card {
-          background-color: #111827;
-          padding: 16px;
-          borderRadius: 16px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border: 1px solid #1f2937;
-        }
-
-        .item-info .item-name {
-          font-weight: 600;
-          color: #f8fafc;
-          font-size: 15px;
-        }
-
-        .item-info .item-price {
-          color: #34d399;
-          font-size: 14px;
-          margin-top: 4px;
-          font-weight: 700;
-        }
-
-        .add-btn {
-          padding: 8px 16px;
-          background-color: #3b82f6;
-          color: #fff;
-          border: none;
-          border-radius: 10px;
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 600;
-          box-shadow: 0 4px 12px rgba(59,130,246,0.3);
-        }
-
-        .floating-cart {
-          position: fixed;
-          bottom: 15px;
-          left: 16px;
-          right: 16px;
-          max-width: 448px;
-          margin: 0 auto;
-          background-color: #111827;
-          color: #fff;
-          padding: 16px;
-          border-radius: 20px;
-          border: 1px solid #C5A059;
-          box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-          z-index: 1400;
-        }
-
-        .cart-header {
-          font-weight: 700;
-          margin-bottom: 8px;
-          font-size: 14px;
-          border-bottom: 1px solid #1f2937;
-          padding-bottom: 8px;
-          display: flex;
-          justify-content: space-between;
-        }
-
-        .cart-items-scroll {
-          max-height: 110px;
-          overflow-y: auto;
-          margin-bottom: 12px;
-        }
-
-        .cart-item-row {
-          display: flex;
-          justify-content: space-between;
-          font-size: 13px;
-          margin: 6px 0;
-          color: #94a3b8;
-          align-items: center;
-        }
-
-        .cart-item-controls {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .item-total-price {
-          font-weight: 600;
-          color: #fff;
-        }
-
-        .qty-btn {
-          padding: 2px 8px;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          color: #fff;
-        }
-
-        .qty-btn.red { background: #ef4444; }
-        .qty-btn.green { background: #10b981; }
-
-        .confirm-order-btn {
-          width: 100%;
-          padding: 13px;
-          background: linear-gradient(135deg, #34d399 0%, #059669 100%);
-          color: #090d16;
-          border: none;
-          border-radius: 12px;
-          font-weight: 700;
-          font-size: 14px;
-          cursor: pointer;
-          box-shadow: 0 4px 15px rgba(52,211,153,0.3);
-        }
-
-        /* Media Breakpoints for Mobile Viewport Adaptation */
         @media (max-width: 900px) {
           .app-layout {
             flex-direction: column;
@@ -1536,7 +1367,7 @@ function App() {
             <h2>The Black Stone</h2>
             <div>
               <span className="role-badge">
-                {userRole === 'admin' ? 'Admin / Cashier' : 'Waiter'}
+                {userRole === 'admin' ? 'Admin' : userRole === 'cashier' ? 'Cashier' : 'Waiter'}
               </span>
             </div>
           </div>
@@ -1705,17 +1536,19 @@ function App() {
                       </div>
                     )}
 
-                    <div style={{ marginTop: '16px' }}>
-                      <button 
-                        onClick={() => {
-                          setTableNo(cabinName);
-                          setActiveTab('order');
-                        }}
-                        style={{ width: '100%', padding: '10px', backgroundColor: '#1f2937', color: '#fff', border: '1px solid #374151', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
-                      >
-                        {isOccupied ? 'View / Add Items' : 'Take Order 📝'}
-                      </button>
-                    </div>
+                    {userRole !== 'cashier' && (
+                      <div style={{ marginTop: '16px' }}>
+                        <button 
+                          onClick={() => {
+                            setTableNo(cabinName);
+                            setActiveTab('order');
+                          }}
+                          style={{ width: '100%', padding: '10px', backgroundColor: '#1f2937', color: '#fff', border: '1px solid #374151', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+                        >
+                          {isOccupied ? 'View / Add Items' : 'Take Order 📝'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1724,7 +1557,7 @@ function App() {
         )}
 
         {/* 2. ORDER SECTION */}
-        {activeTab === 'order' && (
+        {activeTab === 'order' && userRole !== 'cashier' && (
           <div>
             <div style={{ marginBottom: '24px' }}>
               <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>📝 Order & KOT Management (Cabin-wise)</h1>
@@ -2046,7 +1879,7 @@ function App() {
         )}
 
         {/* 5. DAILY EXPENSE ENTRY */}
-        {activeTab === 'expenses' && userRole === 'admin' && (
+        {activeTab === 'expenses' && (
           <div>
             <div className="filter-header-flex">
               <div>
@@ -2136,7 +1969,7 @@ function App() {
         )}
 
         {/* 6. BILLING & RECEIPTS */}
-        {activeTab === 'billing' && userRole === 'admin' && (
+        {activeTab === 'billing' && (
           <div>
             <div style={{ marginBottom: '24px' }}>
               <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>🧾 Billing & Counter Receipts</h1>
@@ -2261,12 +2094,12 @@ function App() {
         )}
 
         {/* 7. ORDER HISTORY */}
-        {activeTab === 'history' && userRole === 'admin' && (
+        {activeTab === 'history' && (
           <div>
             <div className="filter-header-flex">
               <div>
-                <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>📅 Order History</h1>
-                <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Review past orders and completed transactions.</p>
+                <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>📅 Order History & All Days Record</h1>
+                <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Sabai din ko sales, kharcha (expenses) ra completed transactions ko history yeta herna milcha.</p>
               </div>
 
               <div className="time-filters-bar">
@@ -2286,6 +2119,22 @@ function App() {
               </div>
             </div>
 
+            {/* Summary Cards for Selected History Filter */}
+            <div className="metrics-grid" style={{ marginBottom: '24px' }}>
+              <div className="metric-card" style={{ borderLeft: '4px solid #34d399' }}>
+                <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '600' }}>Total Sales ({historyFilter.toUpperCase()})</span>
+                <h2 style={{ margin: '10px 0 0 0', color: '#34d399', fontSize: '22px', fontWeight: '750' }}>
+                  Rs. {filteredHistoryOrders.reduce((sum, ord) => sum + ord.totalAmount, 0)}
+                </h2>
+              </div>
+              <div className="metric-card" style={{ borderLeft: '4px solid #f87171' }}>
+                <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '600' }}>Total Expenses ({historyFilter.toUpperCase()})</span>
+                <h2 style={{ margin: '10px 0 0 0', color: '#f87171', fontSize: '22px', fontWeight: '750' }}>
+                  Rs. {expenses.filter(exp => checkTimeFilter(exp.rawDate, historyFilter)).reduce((sum, exp) => sum + exp.amount, 0)}
+                </h2>
+              </div>
+            </div>
+
             <div style={{ backgroundColor: '#111827', borderRadius: '20px', overflow: 'hidden', border: '1px solid #1f2937', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
               {filteredHistoryOrders.length > 0 ? (
                 <div className="table-responsive-wrapper">
@@ -2295,6 +2144,7 @@ function App() {
                         <th>Order ID</th>
                         <th>Location</th>
                         <th>Date & Time</th>
+                        <th>Staff / Waiter</th>
                         <th>Amount</th>
                         <th>Status</th>
                       </tr>
@@ -2305,8 +2155,17 @@ function App() {
                           <td style={{ fontWeight: '600', color: '#f8fafc' }}>{ord.id}</td>
                           <td style={{ color: '#C5A059', fontWeight: '600' }}>{ord.tableNo}</td>
                           <td style={{ color: '#94a3b8' }}>{ord.date} {ord.time}</td>
+                          <td style={{ color: '#cbd5e1' }}>{ord.waiterName}</td>
                           <td style={{ fontWeight: '700', color: '#34d399' }}>Rs. {ord.totalAmount}</td>
-                          <td style={{ color: '#cbd5e1' }}><b>{ord.status}</b></td>
+                          <td>
+                            <span style={{ 
+                              padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: '600',
+                              backgroundColor: ord.status === 'Billed' ? 'rgba(52, 211, 153, 0.15)' : 'rgba(96, 165, 250, 0.15)',
+                              color: ord.status === 'Billed' ? '#34d399' : '#60a5fa'
+                            }}>
+                              {ord.status}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -2343,7 +2202,7 @@ function App() {
         )}
 
         {/* 9. CHANGE PASSWORD SETTINGS */}
-        {activeTab === 'settings' && (
+        {activeTab === 'settings' && userRole !== 'waiter' && (
           <div style={{ maxWidth: '480px' }}>
             <h1 style={{ color: '#f8fafc', margin: '0 0 4px 0', fontSize: '26px', fontWeight: '750' }}>⚙️ Security & Password</h1>
             <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>Update your portal login password securely.</p>

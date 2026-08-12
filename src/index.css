@@ -1,111 +1,94 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+.login-wrapper {
+          height: 100vh;
+          background-color: #090d16;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          width: 100vw;
+        }
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+        .login-card {
+          background-color: #111827;
+          padding: 40px 32px;
+          border-radius: 24px;
+          border: 1px solid rgba(197, 160, 89, 0.3);
+          box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+          width: 100%;
+          max-width: 420px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center; /* सबै कुरालाई बीचमा (center) ल्याउन */
+        }
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+        .login-logo-container {
+          width: 90px;  /* लोगोको साइज बढाएको */
+          height: 90px;
+          background-color: #090d16;
+          border-radius: 50%;
+          margin: 0 auto 16px auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          border: 2px solid #C5A059;
+          box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+        }
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
+        .login-logo-container img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+        .login-card h2 {
+          color: #f8fafc;
+          font-size: 24px;
+          margin: 0 0 6px 0;
+          font-weight: 750;
+        }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+        .login-card p {
+          color: #94a3b8;
+          font-size: 14px;
+          margin: 0 0 24px 0;
+        }
 
-body {
-  margin: 0;
-}
+        .form-group {
+          width: 100%; /* input हरूलाई पूर्ण चौडाइ दिन */
+          text-align: left;
+          margin-bottom: 16px;
+        }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+        .form-group label {
+          font-size: 13px;
+          color: #cbd5e1;
+          font-weight: 600;
+        }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+        .form-group input, .form-group select {
+          width: 100%;
+          padding: 12px 14px;
+          margin-top: 6px;
+          border-radius: 12px;
+          border: 1px solid #1f2937;
+          background-color: #090d16;
+          color: #fff;
+          font-size: 14px;
+          outline: none;
+        }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
+        .gold-btn {
+          width: 100%;
+          margin-top: 8px;
+          padding: 14px;
+          background: linear-gradient(135deg, #C5A059 0%, #a3813e 100%);
+          color: #090d16;
+          border: none;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 15px;
+          cursor: pointer;
+          box-shadow: 0 4px 20px rgba(197, 160, 89, 0.4);
+        }
