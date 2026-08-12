@@ -79,6 +79,12 @@ function App() {
     fetchExpenses();
     fetchStaff();
     fetchSettings();
+    
+    // Polling interval to auto-sync live order updates for customers and admin
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchOrders = async () => {
@@ -333,7 +339,7 @@ function App() {
     );
   }
 
-  // ================= CUSTOMER QR SELF-ORDERING VIEW =================
+  // ================= CUSTOMER QR SELF-ORDERING VIEW (EXTREMELY POLISHED & RESPONSIVE) =================
   if (customerTable) {
     const addToCustomerCart = (item) => {
       const existing = customerCart.find((c) => c.name === item.name);
@@ -406,118 +412,142 @@ function App() {
     const myTableOrders = placedOrders.filter(ord => ord.tableNo === customerTable && ord.status !== 'Billed');
 
     return (
-      <div className="customer-portal">
-        <div className="customer-header">
-          <div className="customer-logo">
-            <img src="/logo.png" alt="Logo" onError={(e)=>{e.target.style.display='none';}} />
-          </div>
-          <h2>The Black Stone</h2>
-          <p>Scan, Select & Enjoy Your Meal</p>
-          <div className="customer-table-badge">
-            📍 Seated at: {customerTable}
-          </div>
-        </div>
+      <div style={{ minHeight: '100vh', backgroundColor: '#090d16', color: '#f8fafc', padding: '16px', fontFamily: 'Inter, sans-serif', paddingBottom: customerCart.length > 0 ? '120px' : '30px' }}>
+        <style>{`
+          .qr-container { max-width: 600px; margin: 0 auto; }
+          .qr-header { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid #1f2937; padding: 24px; border-radius: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+          .qr-logo { width: 56px; height: 56px; margin: 0 auto 12px auto; border-radius: 50%; border: 2px solid #C5A059; overflow: hidden; background: #090d16; display: flex; align-items: center; justify-content: center; }
+          .qr-logo img { width: 100%; height: 100%; object-fit: cover; }
+          .table-badge { display: inline-block; background: rgba(197, 160, 89, 0.15); color: #C5A059; border: 1px solid rgba(197, 160, 89, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-top: 10px; }
+          .search-bar { width: 100%; padding: 12px 16px; border-radius: 14px; border: 1px solid #1f2937; background: #111827; color: #fff; font-size: 14px; outline: none; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+          .cat-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 20px; scrollbar-width: none; }
+          .cat-scroll::-webkit-scrollbar { display: none; }
+          .cat-chip { padding: 8px 16px; border-radius: 20px; border: 1px solid #1f2937; background: #111827; color: #94a3b8; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+          .cat-chip.active { background: #C5A059; color: #090d16; border-color: #C5A059; font-weight: 700; box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3); }
+          .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 20px; }
+          .menu-card { background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+          .add-item-btn { background: linear-gradient(135deg, #C5A059 0%, #a3813e 100%); color: #090d16; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2); }
+          .floating-cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #111827; border-top: 1px solid #1f2937; padding: 16px; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); z-index: 1500; border-top-left-radius: 24px; border-top-right-radius: 24px; max-width: 600px; margin: 0 auto; }
+          .live-tracker { background: #111827; border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 16px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        `}</style>
 
-        {customerOrderPlaced ? (
-          <div className="customer-success-card">
-            <div className="success-icon">🎉</div>
-            <h2>Order Placed Successfully!</h2>
-            <p>Your items have been sent straight to the kitchen. Enjoy your stay at The Black Stone!</p>
-            <button onClick={() => setCustomerOrderPlaced(false)} className="gold-btn">
-              Order More Items
-            </button>
+        <div className="qr-container">
+          <div className="qr-header">
+            <div className="qr-logo">
+              <img src="/logo.png" alt="Logo" onError={(e)=>{e.target.style.display='none';}} />
+            </div>
+            <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '750', color: '#fff' }}>The Black Stone</h2>
+            <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>Digital Self-Ordering Menu</p>
+            <div className="table-badge">
+              📍 Seated at: {customerTable}
+            </div>
           </div>
-        ) : (
-          <div>
-            {myTableOrders.length > 0 && (
-              <div className="live-tracking-card">
-                <div className="tracking-header">
-                  <span>📢 Live Order Tracking</span>
-                  <span className="tracking-status-badge">Active</span>
-                </div>
-                {myTableOrders.map((ord, idx) => (
-                  <div key={idx} className="tracking-item">
-                    <div className="tracking-item-top">
-                      <span>Order #{ord.id}</span>
-                      <span style={{ color: ord.status === 'Ready' ? '#34d399' : ord.status === 'Preparing' ? '#fbbf24' : '#60a5fa' }}>
-                        ● {ord.status}
-                      </span>
-                    </div>
-                    <div className="tracking-item-desc">
-                      Items: {ord.items.map(i => `${i.name} (${i.qty})`).join(', ')}
-                    </div>
+
+          {customerOrderPlaced ? (
+            <div style={{ background: '#111827', border: '1px solid #1f2937', borderRadius: '20px', padding: '32px', textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎉</div>
+              <h2 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '22px' }}>Order Placed Successfully!</h2>
+              <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>Your items have been sent straight to the kitchen. Enjoy your dining experience!</p>
+              <button onClick={() => setCustomerOrderPlaced(false)} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #C5A059 0%, #a3813e 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+                Order More Items 🍕
+              </button>
+            </div>
+          ) : (
+            <div>
+              {myTableOrders.length > 0 && (
+                <div className="live-tracker">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid #1f2937', paddingBottom: '8px' }}>
+                    <span style={{ fontWeight: '700', fontSize: '14px', color: '#34d399' }}>📢 Live Order Tracking</span>
+                    <span style={{ fontSize: '11px', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>Active</span>
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="🔍 Search items..."
-                value={customerSearchQuery}
-                onChange={(e) => setCustomerSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="category-chips">
-              {customerCategories.map((cat, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCustomerCategory(cat)}
-                  className={`category-chip ${customerCategory === cat ? 'active' : ''}`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            <div className="customer-menu-list">
-              {filteredCustomerMenu.map((cat, idx) => (
-                <div key={idx} className="menu-category-group">
-                  <h4>{cat.category}</h4>
-                  <div className="menu-items-grid">
-                    {cat.items.map((item, i) => (
-                      <div key={i} className="menu-item-card">
-                        <div className="item-info">
-                          <div className="item-name">{item.name}</div>
-                          <div className="item-price">Rs. {item.price}</div>
-                        </div>
-                        <button onClick={() => addToCustomerCart(item)} className="add-btn">
-                          + Add
-                        </button>
+                  {myTableOrders.map((ord, idx) => (
+                    <div key={idx} style={{ marginBottom: idx < myTableOrders.length - 1 ? '12px' : '0', fontSize: '13px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '600', marginBottom: '4px' }}>
+                        <span style={{ color: '#cbd5e1' }}>Order #{ord.id}</span>
+                        <span style={{ color: ord.status === 'Ready' ? '#34d399' : ord.status === 'Preparing' ? '#fbbf24' : '#60a5fa' }}>
+                          ● Status: {ord.status}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {customerCart.length > 0 && (
-              <div className="floating-cart">
-                <div className="cart-header">
-                  <span>🛒 Cart Summary</span>
-                  <span>{customerCart.reduce((sum, it) => sum + it.qty, 0)} items</span>
-                </div>
-                <div className="cart-items-scroll">
-                  {customerCart.map((it, i) => (
-                    <div key={i} className="cart-item-row">
-                      <span>{it.name} x {it.qty}</span>
-                      <div className="cart-item-controls">
-                        <span className="item-total-price">Rs. {it.price * it.qty}</span>
-                        <button onClick={() => updateCustomerQty(it.name, -1)} className="qty-btn red">-</button>
-                        <button onClick={() => updateCustomerQty(it.name, 1)} className="qty-btn green">+</button>
+                      <div style={{ color: '#94a3b8', fontSize: '12px' }}>
+                        {ord.items.map(i => `${i.name} (${i.qty})`).join(', ')}
                       </div>
                     </div>
                   ))}
                 </div>
-                <button onClick={handleCustomerSubmitOrder} className="confirm-order-btn">
-                  Confirm & Send Order 🚀
-                </button>
+              )}
+
+              <input
+                type="text"
+                className="search-bar"
+                placeholder="🔍 Search delicious items..."
+                value={customerSearchQuery}
+                onChange={(e) => setCustomerSearchQuery(e.target.value)}
+              />
+
+              <div className="cat-scroll">
+                {customerCategories.map((cat, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCustomerCategory(cat)}
+                    className={`cat-chip ${customerCategory === cat ? 'active' : ''}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
-        )}
+
+              <div>
+                {filteredCustomerMenu.map((cat, idx) => (
+                  <div key={idx} style={{ marginBottom: '24px' }}>
+                    <h3 style={{ color: '#C5A059', fontSize: '16px', fontWeight: '700', marginBottom: '12px', borderBottom: '1px solid #1f2937', paddingBottom: '6px' }}>
+                      {cat.category}
+                    </h3>
+                    <div className="menu-grid">
+                      {cat.items.map((item, i) => (
+                        <div key={i} className="menu-card">
+                          <div>
+                            <div style={{ fontWeight: '600', fontSize: '14px', color: '#fff', marginBottom: '4px' }}>{item.name}</div>
+                            <div style={{ fontWeight: '700', fontSize: '14px', color: '#34d399' }}>Rs. {item.price}</div>
+                          </div>
+                          <button onClick={() => addToCustomerCart(item)} className="add-item-btn">
+                            + Add
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {customerCart.length > 0 && (
+                <div className="floating-cart-bar">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span style={{ fontWeight: '700', fontSize: '14px', color: '#C5A059' }}>🛒 Cart Summary ({customerCart.reduce((s, i) => s + i.qty, 0)} items)</span>
+                    <span style={{ fontWeight: '700', fontSize: '15px', color: '#34d399' }}>
+                      Rs. {customerCart.reduce((sum, it) => sum + (it.price * it.qty), 0)}
+                    </span>
+                  </div>
+                  <div style={{ maxHeight: '120px', overflowY: 'auto', marginBottom: '12px', borderTop: '1px solid #1f2937', borderBottom: '1px solid #1f2937', padding: '8px 0' }}>
+                    {customerCart.map((it, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', fontSize: '13px' }}>
+                        <span style={{ color: '#cbd5e1' }}>{it.name}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ color: '#34d399', fontWeight: '600' }}>Rs. {it.price * it.qty}</span>
+                          <button onClick={() => updateCustomerQty(it.name, -1)} style={{ background: '#1f2937', color: '#fff', border: 'none', width: '22px', height: '22px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>-</button>
+                          <span style={{ fontWeight: '600', minWidth: '16px', textAlign: 'center' }}>{it.qty}</span>
+                          <button onClick={() => updateCustomerQty(it.name, 1)} style={{ background: '#1f2937', color: '#fff', border: 'none', width: '22px', height: '22px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>+</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={handleCustomerSubmitOrder} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #34d399 0%, #059669 100%)', color: '#090d16', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '15px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(52,211,153,0.3)' }}>
+                    Confirm & Send Order to Kitchen 🚀
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -2221,7 +2251,7 @@ function App() {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '24px' }}>
-                  <label>New Password</label>
+                  <label>NewPassword</label>
                   <input
                     type="password"
                     placeholder="Enter new password (min 4 chars)"
